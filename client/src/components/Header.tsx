@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tantml:parameter>
+import { queryClient } from "@/lib/queryClient";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +43,11 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
+    // Clear cart and other user-specific query caches
+    queryClient.removeQueries({ queryKey: ["/api/cart"] });
+    queryClient.removeQueries({ queryKey: ["/api/wishlist"] });
+    queryClient.removeQueries({ queryKey: ["/api/addresses"] });
+    queryClient.removeQueries({ queryKey: ["/api/orders"] });
     setLocation("/");
   };
 
