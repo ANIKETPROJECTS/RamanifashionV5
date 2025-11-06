@@ -53,7 +53,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background border-b">
+    <header className="sticky top-0 z-50 w-full bg-white border-b">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between gap-4">
           <Button
@@ -139,7 +139,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
         </div>
       </div>
 
-      <nav className="hidden md:block border-t">
+      <nav className="hidden md:block border-t bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <ul className="flex items-center justify-center gap-8 py-3 text-sm">
             <li><a href="/" className="hover-elevate px-3 py-2 rounded-md" data-testid="link-home">Home</a></li>
