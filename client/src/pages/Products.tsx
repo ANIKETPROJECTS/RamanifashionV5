@@ -13,6 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { motion } from "framer-motion";
 
 export default function Products() {
   const [location] = useLocation();
@@ -433,26 +434,36 @@ export default function Products() {
             ) : (
               <>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-                  {products.map((product: any) => {
+                  {products.map((product: any, index: number) => {
                     const discount = product.originalPrice 
                       ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
                       : 0;
 
                     return (
-                      <ProductCard
+                      <motion.div
                         key={product._id}
-                        id={product._id}
-                        name={product.name}
-                        image={product.images?.[0] || "/api/placeholder/400/600"}
-                        secondaryImage={product.images?.[1]}
-                        price={product.price}
-                        originalPrice={product.originalPrice}
-                        discount={discount || undefined}
-                        rating={product.rating}
-                        reviewCount={product.reviewCount}
-                        isNew={product.isNew}
-                        isBestseller={product.isBestseller}
-                      />
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          duration: 0.5,
+                          delay: index * 0.1,
+                          ease: "easeOut"
+                        }}
+                      >
+                        <ProductCard
+                          id={product._id}
+                          name={product.name}
+                          image={product.images?.[0] || "/api/placeholder/400/600"}
+                          secondaryImage={product.images?.[1]}
+                          price={product.price}
+                          originalPrice={product.originalPrice}
+                          discount={discount || undefined}
+                          rating={product.rating}
+                          reviewCount={product.reviewCount}
+                          isNew={product.isNew}
+                          isBestseller={product.isBestseller}
+                        />
+                      </motion.div>
                     );
                   })}
                 </div>

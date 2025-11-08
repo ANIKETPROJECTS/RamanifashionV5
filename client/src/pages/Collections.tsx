@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { useLocation } from "wouter";
+import { motion } from "framer-motion";
 
 import bridalImage from "@assets/generated_images/Bridal_saree_product_shot_3a9642d4.png";
 import partyImage from "@assets/generated_images/Party_wear_saree_86e79eab.png";
@@ -51,25 +52,35 @@ export default function Collections() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {collections.map((collection) => (
-            <Card
+          {collections.map((collection, index) => (
+            <motion.div
               key={collection.title}
-              className="overflow-hidden cursor-pointer hover-elevate active-elevate-2 group"
-              onClick={() => setLocation(collection.link)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.5,
+                delay: index * 0.15,
+                ease: "easeOut"
+              }}
             >
-              <div className="aspect-[4/3] relative overflow-hidden">
-                <img
-                  src={collection.image}
-                  alt={collection.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <h2 className="text-2xl font-bold mb-2">{collection.title}</h2>
-                  <p className="text-white/90">{collection.description}</p>
+              <Card
+                className="overflow-hidden cursor-pointer hover-elevate active-elevate-2 group"
+                onClick={() => setLocation(collection.link)}
+              >
+                <div className="aspect-[4/3] relative overflow-hidden">
+                  <img
+                    src={collection.image}
+                    alt={collection.title}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <h2 className="text-2xl font-bold mb-2">{collection.title}</h2>
+                    <p className="text-white/90">{collection.description}</p>
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </main>
