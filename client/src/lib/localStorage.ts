@@ -23,6 +23,8 @@ export const localStorageService = {
 
   setCart(cart: LocalCart): void {
     localStorage.setItem('guest_cart', JSON.stringify(cart));
+    // Dispatch custom event to notify Header component
+    window.dispatchEvent(new CustomEvent('cartUpdated'));
   },
 
   addToCart(productId: string, quantity: number = 1): void {
@@ -56,6 +58,8 @@ export const localStorageService = {
 
   clearCart(): void {
     localStorage.removeItem('guest_cart');
+    // Dispatch custom event to notify Header component
+    window.dispatchEvent(new CustomEvent('cartUpdated'));
   },
 
   getWishlist(): LocalWishlist {
@@ -69,6 +73,8 @@ export const localStorageService = {
 
   setWishlist(wishlist: LocalWishlist): void {
     localStorage.setItem('guest_wishlist', JSON.stringify(wishlist));
+    // Dispatch custom event to notify Header component
+    window.dispatchEvent(new CustomEvent('wishlistUpdated'));
   },
 
   addToWishlist(productId: string): void {
@@ -92,5 +98,7 @@ export const localStorageService = {
 
   clearWishlist(): void {
     localStorage.removeItem('guest_wishlist');
+    // Dispatch custom event to notify Header component
+    window.dispatchEvent(new CustomEvent('wishlistUpdated'));
   }
 };

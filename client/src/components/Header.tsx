@@ -35,19 +35,77 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
   const [searchQuery, setSearchQuery] = useState("");
   const [, setLocation] = useLocation();
   const [user, setUser] = useState<any>(null);
+  const [storageUpdateTrigger, setStorageUpdateTrigger] = useState(0);
 
   const { data: cart } = useQuery({
     queryKey: ["/api/cart"],
     enabled: !!user,
   });
 
-  const actualCartCount = (cart as any)?.items?.length || cartCount;
+  const { data: wishlist } = useQuery({
+    queryKey: ["/api/wishlist"],
+    enabled: !!user,
+  });
+
+  // Calculate cart count with fallback to local storage for guest users
+  const getCartCount = () => {
+    if (user && cart) {
+      return (cart as any)?.items?.length || 0;
+    }
+    // Fallback to local storage for guest users
+    const guestCart = localStorage.getItem("guest_cart");
+    if (guestCart) {
+      try {
+        const parsedCart = JSON.parse(guestCart);
+        return parsedCart.items?.length || 0;
+      } catch {
+        return 0;
+      }
+    }
+    return cartCount;
+  };
+
+  // Calculate wishlist count with fallback to local storage for guest users
+  const getWishlistCount = () => {
+    if (user && wishlist) {
+      return (wishlist as any)?.products?.length || 0;
+    }
+    // Fallback to local storage for guest users
+    const guestWishlist = localStorage.getItem("guest_wishlist");
+    if (guestWishlist) {
+      try {
+        const parsedWishlist = JSON.parse(guestWishlist);
+        return parsedWishlist.products?.length || 0;
+      } catch {
+        return 0;
+      }
+    }
+    return wishlistCount;
+  };
+
+  const actualCartCount = getCartCount();
+  const actualWishlistCount = getWishlistCount();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+
+    // Listen for cart/wishlist updates in localStorage
+    const handleStorageChange = () => {
+      setStorageUpdateTrigger(prev => prev + 1);
+    };
+
+    // Listen for custom events (when localStorage is updated programmatically in the same window)
+    window.addEventListener('cartUpdated', handleStorageChange);
+    window.addEventListener('wishlistUpdated', handleStorageChange);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('cartUpdated', handleStorageChange);
+      window.removeEventListener('wishlistUpdated', handleStorageChange);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -182,12 +240,12 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
             
             <Button variant="ghost" size="icon" className="relative h-12 w-12 hover:bg-gray-100" onClick={() => setLocation("/wishlist")} data-testid="button-wishlist">
               <Heart className="h-8 w-8" />
-              {wishlistCount > 0 && (
+              {actualWishlistCount > 0 && (
                 <Badge 
                   className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                   data-testid="badge-wishlist-count"
                 >
-                  {wishlistCount}
+                  {actualWishlistCount}
                 </Badge>
               )}
             </Button>
