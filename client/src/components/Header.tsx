@@ -169,8 +169,8 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
     setLocation("/");
   };
 
-  const handleContactClick = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const handleContactClick = (e?: MouseEvent<HTMLButtonElement>) => {
+    e?.preventDefault();
     setLocation("/");
     setTimeout(() => {
       const contactSection = document.getElementById("contact");
@@ -586,7 +586,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
               </Link>
               <button
                 onClick={() => {
-                  handleContactClick({} as MouseEvent<HTMLButtonElement>);
+                  handleContactClick();
                   setMobileMenuOpen(false);
                 }}
                 className={`text-base font-medium py-3 px-4 block rounded-md hover-elevate text-left w-full transition-colors ${navState.isContact ? "bg-primary/10 text-primary" : "text-foreground"}`}
