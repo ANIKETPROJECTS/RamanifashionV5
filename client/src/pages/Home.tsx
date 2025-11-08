@@ -8,6 +8,7 @@ import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -212,16 +213,50 @@ export default function Home() {
     },
   ];
 
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0 }
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
       <main>
-        <HeroCarousel />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          <HeroCarousel />
+        </motion.div>
 
-        <section className="py-12" style={{ backgroundColor: 'rgba(250, 220, 235, 0.7)' }}>
+        <motion.section 
+          className="py-12" 
+          style={{ backgroundColor: 'rgba(250, 220, 235, 0.7)' }}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="max-w-7xl mx-auto px-4">
-            <div className="relative mb-6">
+            <motion.div 
+              className="relative mb-6"
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <div className="text-center">
                 <h2 className="text-3xl font-bold font-serif bg-primary text-white border-2 border-white rounded-full px-8 py-3 inline-block" data-testid="text-section-new-arrivals-home">
                   New Arrival
@@ -234,29 +269,46 @@ export default function Home() {
               >
                 View All
               </button>
-            </div>
+            </motion.div>
             <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-              <div className="flex gap-4 pb-4">
-                {newArrivals.slice(0, 6).map((product: any) => (
-                  <NewArrivalCard
+              <motion.div 
+                className="flex gap-4 pb-4"
+                variants={staggerContainer}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+              >
+                {newArrivals.slice(0, 6).map((product: any, index: number) => (
+                  <motion.div
                     key={product._id}
-                    id={product._id}
-                    name={product.name}
-                    image={product.images?.[0] || "/placeholder.jpg"}
-                    price={product.price}
-                    originalPrice={product.originalPrice}
-                    discount={product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0}
-                    rating={product.rating}
-                    reviewCount={product.reviewCount}
-                    onClick={() => setLocation(`/product/${product._id}`)}
-                  />
+                    variants={fadeInUp}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <NewArrivalCard
+                      id={product._id}
+                      name={product.name}
+                      image={product.images?.[0] || "/placeholder.jpg"}
+                      price={product.price}
+                      originalPrice={product.originalPrice}
+                      discount={product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0}
+                      rating={product.rating}
+                      reviewCount={product.reviewCount}
+                      onClick={() => setLocation(`/product/${product._id}`)}
+                    />
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
-        <section className="max-w-7xl mx-auto px-4 py-8">
+        <motion.section 
+          className="max-w-7xl mx-auto px-4 py-8"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="w-full overflow-hidden rounded-lg">
             <img 
               src={ramaniBanner} 
@@ -264,11 +316,24 @@ export default function Home() {
               className="w-full h-auto object-cover"
             />
           </div>
-        </section>
+        </motion.section>
 
-        <section className="py-12" style={{ backgroundColor: 'rgba(250, 220, 235, 0.7)' }}>
+        <motion.section 
+          className="py-12" 
+          style={{ backgroundColor: 'rgba(250, 220, 235, 0.7)' }}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="max-w-7xl mx-auto px-4">
-            <div className="relative mb-6">
+            <motion.div 
+              className="relative mb-6"
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <div className="text-center">
                 <h2 className="text-3xl font-bold font-serif bg-primary text-white border-2 border-white rounded-full px-8 py-3 inline-block" data-testid="text-section-trending-collection">
                   Trending Collection
@@ -281,29 +346,46 @@ export default function Home() {
               >
                 View All
               </button>
-            </div>
+            </motion.div>
             <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-              <div className="flex gap-4 pb-4">
-                {trendingProducts.slice(0, 6).map((product: any) => (
-                  <NewArrivalCard
+              <motion.div 
+                className="flex gap-4 pb-4"
+                variants={staggerContainer}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+              >
+                {trendingProducts.slice(0, 6).map((product: any, index: number) => (
+                  <motion.div
                     key={product._id}
-                    id={product._id}
-                    name={product.name}
-                    image={product.images?.[0] || "/placeholder.jpg"}
-                    price={product.price}
-                    originalPrice={product.originalPrice}
-                    discount={product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0}
-                    rating={product.rating}
-                    reviewCount={product.reviewCount}
-                    onClick={() => setLocation(`/product/${product._id}`)}
-                  />
+                    variants={fadeInUp}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <NewArrivalCard
+                      id={product._id}
+                      name={product.name}
+                      image={product.images?.[0] || "/placeholder.jpg"}
+                      price={product.price}
+                      originalPrice={product.originalPrice}
+                      discount={product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0}
+                      rating={product.rating}
+                      reviewCount={product.reviewCount}
+                      onClick={() => setLocation(`/product/${product._id}`)}
+                    />
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
-        <section className="max-w-7xl mx-auto px-4 py-8">
+        <motion.section 
+          className="max-w-7xl mx-auto px-4 py-8"
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7 }}
+        >
           <div className="w-full overflow-hidden rounded-lg bg-black">
             <div className="relative w-full" style={{ paddingBottom: '42%' }}>
               <iframe
@@ -318,17 +400,34 @@ export default function Home() {
               ></iframe>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         <section className="max-w-7xl mx-auto px-4 py-12">
-          <div className="text-center mb-12">
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
             <h2 className="text-3xl font-bold font-serif bg-primary text-white border-2 border-white rounded-full px-8 py-3 inline-block" data-testid="text-section-categories">
               Shop by Category
             </h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {newCategories.map((category) => (
-              <div key={category.name} className="flex flex-col items-center group cursor-pointer">
+          </motion.div>
+          <motion.div 
+            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+          >
+            {newCategories.map((category, index) => (
+              <motion.div 
+                key={category.name} 
+                className="flex flex-col items-center group cursor-pointer"
+                variants={fadeInUp}
+                transition={{ duration: 0.5 }}
+              >
                 <div className="w-full aspect-[2/3] overflow-hidden rounded-lg mb-4 shadow-md hover:shadow-xl transition-shadow duration-300">
                   <img 
                     src={category.image} 
@@ -339,21 +438,40 @@ export default function Home() {
                 <h3 className="text-center text-base md:text-lg font-bold font-serif bg-primary text-white border-2 border-white rounded-full px-6 py-2 inline-block">
                   {category.name}
                 </h3>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </section>
 
-        <section className="py-16" style={{ backgroundColor: 'rgba(250, 220, 235, 0.7)' }}>
+        <motion.section 
+          className="py-16" 
+          style={{ backgroundColor: 'rgba(250, 220, 235, 0.7)' }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12">
+            <motion.div 
+              className="text-center mb-12"
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
               <h2 className="text-3xl font-bold font-serif bg-primary text-white border-2 border-white rounded-full px-8 py-3 inline-block" data-testid="text-section-testimonials">
                 What Our Customers Say
               </h2>
-            </div>
+            </motion.div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-12">
-              <div className="lg:col-span-1 space-y-6">
+              <motion.div 
+                className="lg:col-span-1 space-y-6"
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6 }}
+              >
                 <div className="bg-background rounded-xl p-8 shadow-sm border border-border">
                   <div className="flex items-baseline gap-2 mb-2">
                     <span className="text-6xl font-bold text-foreground">{ratingStats.overall}</span>
@@ -401,11 +519,22 @@ export default function Home() {
                     ))}
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="lg:col-span-2 space-y-6">
+              <motion.div 
+                className="lg:col-span-2 space-y-6"
+                variants={staggerContainer}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+              >
                 {customerReviews.map((review, index) => (
-                  <div key={index} className="bg-background rounded-xl p-6 shadow-sm border border-border">
+                  <motion.div 
+                    key={index} 
+                    className="bg-background rounded-xl p-6 shadow-sm border border-border"
+                    variants={fadeInUp}
+                    transition={{ duration: 0.5 }}
+                  >
                     <div className="flex items-start gap-4 mb-4">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
                         {review.image ? (
@@ -445,14 +574,21 @@ export default function Home() {
                         <span>Helpful ({review.helpful})</span>
                       </button>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
-        <section id="contact" className="py-16 bg-background">
+        <motion.section 
+          id="contact" 
+          className="py-16 bg-background"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold font-serif bg-primary text-white border-2 border-white rounded-full px-8 py-3 inline-block mb-4">Get In Touch</h2>
@@ -729,7 +865,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
       </main>
 
       <Footer />
