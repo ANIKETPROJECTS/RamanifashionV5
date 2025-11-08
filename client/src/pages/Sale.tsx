@@ -1,60 +1,732 @@
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { useQuery } from "@tanstack/react-query";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { SlidersHorizontal, X, ArrowUpDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
-import { Loader2 } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 export default function Sale() {
-  const [, setLocation] = useLocation();
+  const [location] = useLocation();
+  const [showFilters, setShowFilters] = useState(false);
+  const [showMobileSort, setShowMobileSort] = useState(false);
+  const [sortBy, setSortBy] = useState("discount");
+  const [order, setOrder] = useState("desc");
+  const [page, setPage] = useState(1);
+  const [priceRange, setPriceRange] = useState([500, 50000]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedFabrics, setSelectedFabrics] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [openSections, setOpenSections] = useState<string[]>(["categories", "price", "fabric"]);
 
-  const { data: productsData, isLoading } = useQuery({
-    queryKey: ["/api/products?sort=price&order=asc"],
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    const categoryParam = urlParams.get('category');
+    setSelectedCategories(categoryParam ? categoryParam.split(',') : []);
+    
+    const occasionParam = urlParams.get('occasion');
+    setSelectedOccasions(occasionParam ? occasionParam.split(',') : []);
+    
+    const colorParam = urlParams.get('color');
+    setSelectedColors(colorParam ? colorParam.split(',') : []);
+    
+    const fabricParam = urlParams.get('fabric');
+    setSelectedFabrics(fabricParam ? fabricParam.split(',') : []);
+    
+    setPage(1);
+  }, [location]);
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev =>
+      prev.includes(section) ? prev.filter(s => s !== section) : [...prev, section]
+    );
+  };
+
+  const queryParams = new URLSearchParams({
+    page: page.toString(),
+    limit: "12",
+    minPrice: priceRange[0].toString(),
+    maxPrice: priceRange[1].toString(),
   });
 
-  const saleProducts = (productsData as any)?.products?.slice(0, 12) || [];
+  if (sortBy && order) {
+    queryParams.append("sort", sortBy);
+    queryParams.append("order", order);
+  }
+
+  if (selectedCategories.length > 0) {
+    queryParams.append("category", selectedCategories.join(","));
+  }
+  if (selectedFabrics.length > 0) {
+    queryParams.append("fabric", selectedFabrics.join(","));
+  }
+  if (selectedColors.length > 0) {
+    queryParams.append("color", selectedColors.join(","));
+  }
+  if (selectedOccasions.length > 0) {
+    queryParams.append("occasion", selectedOccasions.join(","));
+  }
+  if (inStockOnly) {
+    queryParams.append("inStock", "true");
+  }
+
+  const { data: productsData, isLoading } = useQuery({
+    queryKey: ["/api/products", queryParams.toString()],
+    queryFn: async () => {
+      const response = await fetch(`/api/products?${queryParams}`);
+      if (!response.ok) throw new Error("Failed to fetch products");
+      return response.json();
+    },
+  });
+
+  const { data: filtersData } = useQuery<{
+    categories: string[];
+    fabrics: string[];
+    colors: string[];
+    occasions: string[];
+  }>({
+    queryKey: ["/api/filters"],
+  });
+
+  const products = (productsData?.products || []).filter((p: any) => p.originalPrice && p.originalPrice > p.price);
+  const pagination = productsData?.pagination || { total: products.length, pages: 1 };
+
+  const categories = filtersData?.categories || ["Jamdani Paithani", "Khun / Irkal (Ilkal)", "Ajrakh Modal", "Mul Mul Cotton", "Khadi Cotton", "Patch Work", "Pure Linen"];
+  const fabrics = filtersData?.fabrics || ["Silk", "Cotton", "Georgette", "Chiffon", "Net", "Crepe", "Chanderi", "Linen"];
+  const colors = filtersData?.colors || ["Red", "Blue", "Green", "Pink", "Yellow", "Black", "White", "Purple", "Maroon", "Grey"];
+  const occasions = filtersData?.occasions || ["Wedding", "Party", "Festival", "Casual", "Office"];
+
+  const handleSortChange = (value: string) => {
+    if (value === "none") {
+      setSortBy("discount");
+      setOrder("desc");
+    } else {
+      const [newSort, newOrder] = value.split("-");
+      setSortBy(newSort);
+      setOrder(newOrder || "desc");
+    }
+    setPage(1);
+  };
+
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
+    );
+    setPage(1);
+  };
+
+  const toggleFabric = (fabric: string) => {
+    setSelectedFabrics(prev =>
+      prev.includes(fabric) ? prev.filter(f => f !== fabric) : [...prev, fabric]
+    );
+    setPage(1);
+  };
+
+  const toggleColor = (color: string) => {
+    setSelectedColors(prev =>
+      prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]
+    );
+    setPage(1);
+  };
+
+  const toggleOccasion = (occasion: string) => {
+    setSelectedOccasions(prev =>
+      prev.includes(occasion) ? prev.filter(o => o !== occasion) : [...prev, occasion]
+    );
+    setPage(1);
+  };
+
+  const clearAllFilters = () => {
+    setSelectedCategories([]);
+    setSelectedFabrics([]);
+    setSelectedColors([]);
+    setSelectedOccasions([]);
+    setPriceRange([500, 50000]);
+    setInStockOnly(false);
+    setPage(1);
+  };
+
+  const activeFiltersCount = selectedCategories.length + selectedFabrics.length + selectedColors.length + selectedOccasions.length + (inStockOnly ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main>
-        <section className="bg-destructive text-destructive-foreground py-16">
-          <div className="max-w-4xl mx-auto px-4 text-center">
-            <h1 className="text-5xl font-bold mb-4">SALE</h1>
-            <p className="text-xl">Up to 50% off on selected sarees</p>
-          </div>
-        </section>
+      <section className="bg-destructive text-destructive-foreground py-16">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h1 className="text-5xl font-bold mb-4">SALE</h1>
+          <p className="text-xl">Up to 50% off on selected sarees</p>
+        </div>
+      </section>
 
-        <section className="max-w-7xl mx-auto px-4 py-12">
-          {isLoading ? (
-            <div className="flex justify-center items-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="max-w-7xl mx-auto px-4 py-8 pb-20 lg:pb-8">
+        <div className="mb-6">
+          <nav className="text-sm text-muted-foreground mb-4" data-testid="breadcrumb">
+            <a href="/" className="hover:text-foreground">Home</a>
+            <span className="mx-2">/</span>
+            <span className="text-foreground">Sale</span>
+          </nav>
+          
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-2xl font-bold mb-1" data-testid="text-page-title">
+                Sale Products
+              </h2>
+              <p className="text-muted-foreground" data-testid="text-results-count">
+                {products.length} products
+              </p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {saleProducts.map((product: any) => (
-                <ProductCard
-                  key={product._id}
-                  id={product._id}
-                  name={product.name}
-                  image={product.images?.[0] || "/placeholder.jpg"}
-                  price={product.price}
-                  originalPrice={product.originalPrice}
-                  discount={product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0}
-                  rating={product.rating}
-                  reviewCount={product.reviewCount}
-                  isNew={product.isNew}
-                  isBestseller={product.isBestseller}
-                  onClick={() => setLocation(`/product/${product._id}`)}
-                  onAddToCart={() => {}}
-                  onAddToWishlist={() => {}}
-                />
+            
+            <div className="hidden lg:flex items-center gap-2">
+              <Select 
+                value={sortBy && order ? `${sortBy}-${order}` : "discount-desc"} 
+                onValueChange={handleSortChange}
+              >
+                <SelectTrigger className="w-48" data-testid="select-sort">
+                  <SelectValue placeholder="Sort By" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sort By</SelectItem>
+                  <SelectItem value="discount-desc">Best Discount</SelectItem>
+                  <SelectItem value="createdAt-desc">What's New</SelectItem>
+                  <SelectItem value="rating-desc">Highest Rated</SelectItem>
+                  <SelectItem value="reviewCount-desc">Most Reviews</SelectItem>
+                  <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                  <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                  <SelectItem value="name-asc">Name: A to Z</SelectItem>
+                  <SelectItem value="name-desc">Name: Z to A</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {activeFiltersCount > 0 && (
+            <div className="flex items-center gap-2 mt-4 flex-wrap">
+              <span className="text-sm text-muted-foreground">Active filters:</span>
+              {selectedCategories.map(cat => (
+                <Button
+                  key={cat}
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => toggleCategory(cat)}
+                  data-testid={`filter-tag-${cat.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  {cat} <X className="h-3 w-3 ml-1" />
+                </Button>
               ))}
+              {selectedFabrics.map(fab => (
+                <Button
+                  key={fab}
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => toggleFabric(fab)}
+                >
+                  {fab} <X className="h-3 w-3 ml-1" />
+                </Button>
+              ))}
+              {selectedColors.map(col => (
+                <Button
+                  key={col}
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => toggleColor(col)}
+                >
+                  {col} <X className="h-3 w-3 ml-1" />
+                </Button>
+              ))}
+              {selectedOccasions.map(occ => (
+                <Button
+                  key={occ}
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => toggleOccasion(occ)}
+                >
+                  {occ} <X className="h-3 w-3 ml-1" />
+                </Button>
+              ))}
+              {inStockOnly && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setInStockOnly(false)}
+                >
+                  In Stock <X className="h-3 w-3 ml-1" />
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={clearAllFilters}
+                data-testid="button-clear-filters"
+              >
+                Clear All
+              </Button>
             </div>
           )}
-        </section>
-      </main>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <aside className="hidden lg:block lg:col-span-1">
+            <div className="sticky top-4 space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Filters</h3>
+                {activeFiltersCount > 0 && (
+                  <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+                    Clear All
+                  </Button>
+                )}
+              </div>
+
+              <Collapsible open={openSections.includes("categories")}>
+                <CollapsibleTrigger 
+                  className="flex items-center justify-between w-full py-2 hover-elevate px-2 rounded-md"
+                  onClick={() => toggleSection("categories")}
+                >
+                  <span className="font-medium">Categories</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("categories") ? "rotate-180" : ""}`} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-3 pt-2">
+                  {categories.map((category: string) => (
+                    <div key={category} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={category} 
+                        checked={selectedCategories.includes(category)}
+                        onCheckedChange={() => toggleCategory(category)}
+                        data-testid={`checkbox-category-${category.toLowerCase().replace(/\s+/g, '-')}`}
+                      />
+                      <Label htmlFor={category} className="text-sm cursor-pointer">
+                        {category}
+                      </Label>
+                    </div>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible open={openSections.includes("price")}>
+                <CollapsibleTrigger 
+                  className="flex items-center justify-between w-full py-2 hover-elevate px-2 rounded-md"
+                  onClick={() => toggleSection("price")}
+                >
+                  <span className="font-medium">Price Range</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("price") ? "rotate-180" : ""}`} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-4 space-y-4">
+                  <Slider
+                    value={priceRange}
+                    onValueChange={(val) => {
+                      setPriceRange(val);
+                      setPage(1);
+                    }}
+                    min={500}
+                    max={50000}
+                    step={500}
+                    data-testid="slider-price-range"
+                  />
+                  <div className="flex items-center justify-between text-sm">
+                    <span data-testid="text-price-min">₹{priceRange[0]}</span>
+                    <span data-testid="text-price-max">₹{priceRange[1]}</span>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible open={openSections.includes("fabric")}>
+                <CollapsibleTrigger 
+                  className="flex items-center justify-between w-full py-2 hover-elevate px-2 rounded-md"
+                  onClick={() => toggleSection("fabric")}
+                >
+                  <span className="font-medium">Fabric Type</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("fabric") ? "rotate-180" : ""}`} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-3 pt-2">
+                  {fabrics.map((fabric: string) => (
+                    <div key={fabric} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={fabric} 
+                        checked={selectedFabrics.includes(fabric)}
+                        onCheckedChange={() => toggleFabric(fabric)}
+                      />
+                      <Label htmlFor={fabric} className="text-sm cursor-pointer">
+                        {fabric}
+                      </Label>
+                    </div>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible open={openSections.includes("occasion")}>
+                <CollapsibleTrigger 
+                  className="flex items-center justify-between w-full py-2 hover-elevate px-2 rounded-md"
+                  onClick={() => toggleSection("occasion")}
+                >
+                  <span className="font-medium">Occasion</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("occasion") ? "rotate-180" : ""}`} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-3 pt-2">
+                  {occasions.map((occasion: string) => (
+                    <div key={occasion} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={occasion} 
+                        checked={selectedOccasions.includes(occasion)}
+                        onCheckedChange={() => toggleOccasion(occasion)}
+                      />
+                      <Label htmlFor={occasion} className="text-sm cursor-pointer">
+                        {occasion}
+                      </Label>
+                    </div>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible open={openSections.includes("color")}>
+                <CollapsibleTrigger 
+                  className="flex items-center justify-between w-full py-2 hover-elevate px-2 rounded-md"
+                  onClick={() => toggleSection("color")}
+                >
+                  <span className="font-medium">Color</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("color") ? "rotate-180" : ""}`} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <div className="grid grid-cols-5 gap-3">
+                    {colors.map((color: string) => (
+                      <button
+                        key={color}
+                        className={`w-10 h-10 rounded-full border-2 hover-elevate ${
+                          selectedColors.includes(color) ? 'border-primary ring-2 ring-primary' : 'border-border'
+                        }`}
+                        style={{ backgroundColor: color.toLowerCase() }}
+                        onClick={() => toggleColor(color)}
+                        title={color}
+                        data-testid={`button-color-${color.toLowerCase()}`}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="inStock"
+                    checked={inStockOnly}
+                    onCheckedChange={(checked) => {
+                      setInStockOnly(checked as boolean);
+                      setPage(1);
+                    }}
+                    data-testid="checkbox-in-stock"
+                  />
+                  <Label htmlFor="inStock" className="text-sm cursor-pointer">
+                    In Stock Only
+                  </Label>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <div className="lg:col-span-3">
+            {isLoading ? (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="h-96 bg-muted animate-pulse rounded-lg" />
+                ))}
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-muted-foreground text-lg mb-4">No sale products found</p>
+                <Button onClick={clearAllFilters} variant="outline">
+                  Clear Filters
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+                  {products.map((product: any) => {
+                    const discount = product.originalPrice 
+                      ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+                      : 0;
+                    
+                    return (
+                      <ProductCard
+                        key={product._id}
+                        id={product._id}
+                        name={product.name}
+                        image={product.images?.[0] || "/placeholder.jpg"}
+                        secondaryImage={product.images?.[1]}
+                        price={product.price}
+                        originalPrice={product.originalPrice}
+                        discount={discount}
+                        rating={product.rating}
+                        reviewCount={product.reviewCount}
+                        isNew={product.isNew}
+                        isBestseller={product.isBestseller}
+                      />
+                    );
+                  })}
+                </div>
+
+                {pagination.pages > 1 && (
+                  <div className="flex justify-center items-center gap-2 mt-8">
+                    <Button
+                      variant="outline"
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      data-testid="button-prev-page"
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      Page {page} of {pagination.pages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      onClick={() => setPage(p => Math.min(pagination.pages, p + 1))}
+                      disabled={page === pagination.pages}
+                      data-testid="button-next-page"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Bottom Bar with Sort and Filter */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t z-50 safe-area-pb">
+        <div className="grid grid-cols-2 gap-px">
+          <Sheet open={showMobileSort} onOpenChange={setShowMobileSort}>
+            <SheetTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="h-14 rounded-none flex items-center justify-center gap-2"
+                data-testid="button-mobile-sort"
+              >
+                <ArrowUpDown className="h-5 w-5" />
+                <span className="font-medium">SORT</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[50vh]">
+              <SheetHeader>
+                <SheetTitle>Sort By</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6 space-y-2">
+                {[
+                  { value: "none", label: "Default" },
+                  { value: "discount-desc", label: "Best Discount" },
+                  { value: "createdAt-desc", label: "What's New" },
+                  { value: "rating-desc", label: "Highest Rated" },
+                  { value: "reviewCount-desc", label: "Most Reviews" },
+                  { value: "price-asc", label: "Price: Low to High" },
+                  { value: "price-desc", label: "Price: High to Low" },
+                  { value: "name-asc", label: "Name: A to Z" },
+                  { value: "name-desc", label: "Name: Z to A" },
+                ].map((option) => (
+                  <Button
+                    key={option.value}
+                    variant={
+                      (option.value === "discount-desc" && !sortBy && !order) ||
+                      (sortBy && order && `${sortBy}-${order}` === option.value)
+                        ? "default"
+                        : "ghost"
+                    }
+                    className="w-full justify-start"
+                    onClick={() => {
+                      handleSortChange(option.value);
+                      setShowMobileSort(false);
+                    }}
+                    data-testid={`button-sort-${option.value}`}
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <Sheet open={showFilters} onOpenChange={setShowFilters}>
+            <SheetTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="h-14 rounded-none flex items-center justify-center gap-2"
+                data-testid="button-mobile-filter"
+              >
+                <SlidersHorizontal className="h-5 w-5" />
+                <span className="font-medium">FILTER</span>
+                {activeFiltersCount > 0 && (
+                  <span className="bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
+              <SheetHeader className="mb-4">
+                <div className="flex items-center justify-between">
+                  <SheetTitle>Filters</SheetTitle>
+                  {activeFiltersCount > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+                      Clear All
+                    </Button>
+                  )}
+                </div>
+              </SheetHeader>
+              
+              <div className="space-y-6">
+                <Collapsible open={openSections.includes("categories")}>
+                  <CollapsibleTrigger 
+                    className="flex items-center justify-between w-full py-3 hover-elevate px-2 rounded-md"
+                    onClick={() => toggleSection("categories")}
+                  >
+                    <span className="font-medium">Categories</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("categories") ? "rotate-180" : ""}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-3 pt-2">
+                    {categories.map((category: string) => (
+                      <div key={category} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`mobile-${category}`} 
+                          checked={selectedCategories.includes(category)}
+                          onCheckedChange={() => toggleCategory(category)}
+                        />
+                        <Label htmlFor={`mobile-${category}`} className="text-sm cursor-pointer">
+                          {category}
+                        </Label>
+                      </div>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                <Collapsible open={openSections.includes("price")}>
+                  <CollapsibleTrigger 
+                    className="flex items-center justify-between w-full py-3 hover-elevate px-2 rounded-md"
+                    onClick={() => toggleSection("price")}
+                  >
+                    <span className="font-medium">Price Range</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("price") ? "rotate-180" : ""}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-4 space-y-4">
+                    <Slider
+                      value={priceRange}
+                      onValueChange={(val) => {
+                        setPriceRange(val);
+                        setPage(1);
+                      }}
+                      min={500}
+                      max={50000}
+                      step={500}
+                    />
+                    <div className="flex items-center justify-between text-sm">
+                      <span>₹{priceRange[0]}</span>
+                      <span>₹{priceRange[1]}</span>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                <Collapsible open={openSections.includes("fabric")}>
+                  <CollapsibleTrigger 
+                    className="flex items-center justify-between w-full py-3 hover-elevate px-2 rounded-md"
+                    onClick={() => toggleSection("fabric")}
+                  >
+                    <span className="font-medium">Fabric Type</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("fabric") ? "rotate-180" : ""}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-3 pt-2">
+                    {fabrics.map((fabric: string) => (
+                      <div key={fabric} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`mobile-${fabric}`} 
+                          checked={selectedFabrics.includes(fabric)}
+                          onCheckedChange={() => toggleFabric(fabric)}
+                        />
+                        <Label htmlFor={`mobile-${fabric}`} className="text-sm cursor-pointer">
+                          {fabric}
+                        </Label>
+                      </div>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                <Collapsible open={openSections.includes("occasion")}>
+                  <CollapsibleTrigger 
+                    className="flex items-center justify-between w-full py-3 hover-elevate px-2 rounded-md"
+                    onClick={() => toggleSection("occasion")}
+                  >
+                    <span className="font-medium">Occasion</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("occasion") ? "rotate-180" : ""}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-3 pt-2">
+                    {occasions.map((occasion: string) => (
+                      <div key={occasion} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`mobile-${occasion}`} 
+                          checked={selectedOccasions.includes(occasion)}
+                          onCheckedChange={() => toggleOccasion(occasion)}
+                        />
+                        <Label htmlFor={`mobile-${occasion}`} className="text-sm cursor-pointer">
+                          {occasion}
+                        </Label>
+                      </div>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                <Collapsible open={openSections.includes("color")}>
+                  <CollapsibleTrigger 
+                    className="flex items-center justify-between w-full py-3 hover-elevate px-2 rounded-md"
+                    onClick={() => toggleSection("color")}
+                  >
+                    <span className="font-medium">Color</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("color") ? "rotate-180" : ""}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-2">
+                    <div className="grid grid-cols-5 gap-3">
+                      {colors.map((color: string) => (
+                        <button
+                          key={color}
+                          className={`w-10 h-10 rounded-full border-2 hover-elevate ${
+                            selectedColors.includes(color) ? 'border-primary ring-2 ring-primary' : 'border-border'
+                          }`}
+                          style={{ backgroundColor: color.toLowerCase() }}
+                          onClick={() => toggleColor(color)}
+                          title={color}
+                        />
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                <div className="pt-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="mobile-inStock"
+                      checked={inStockOnly}
+                      onCheckedChange={(checked) => {
+                        setInStockOnly(checked as boolean);
+                        setPage(1);
+                      }}
+                    />
+                    <Label htmlFor="mobile-inStock" className="text-sm cursor-pointer">
+                      In Stock Only
+                    </Label>
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
 
       <Footer />
     </div>
