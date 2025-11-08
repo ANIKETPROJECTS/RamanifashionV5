@@ -31,34 +31,34 @@ export default function Footer() {
             </p>
             <div className="flex items-start gap-8">
               <a 
-                href="https://instagram.com/ramanifashion" 
+                href="https://www.instagram.com/ramanifashionindia/" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity"
                 data-testid="link-instagram-footer"
               >
                 <img src={instagramIcon} alt="Instagram" className="h-6 w-6" />
-                <span className="text-xs font-medium text-black">@ramanifashion</span>
+                <span className="text-xs font-medium text-black">@ramanifashionindia</span>
               </a>
               <a 
-                href="https://facebook.com/ramanifashion" 
+                href="https://www.facebook.com/186191114586811" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity"
                 data-testid="link-facebook-footer"
               >
                 <img src={facebookIcon} alt="Facebook" className="h-6 w-6" />
-                <span className="text-xs font-medium text-black">@ramanifashion</span>
+                <span className="text-xs font-medium text-black">Ramani Fashion</span>
               </a>
               <a 
-                href="https://wa.me/915555555555" 
+                href="https://chat.whatsapp.com/GqIsU9ZF2SJ9buuSKxGFWB" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity"
                 data-testid="link-whatsapp-footer"
               >
                 <SiWhatsapp className="h-6 w-6 text-green-600" />
-                <span className="text-xs font-medium text-black">+91 5555555555</span>
+                <span className="text-xs font-medium text-black">WhatsApp Group</span>
               </a>
             </div>
           </div>

@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
-import { FaInstagram, FaWhatsapp } from "react-icons/fa";
+import { FaInstagram, FaWhatsapp, FaFacebook } from "react-icons/fa";
 
 import bridalImage from "@assets/generated_images/Bridal_saree_product_shot_3a9642d4.png";
 import cottonImage from "@assets/generated_images/Cotton_saree_product_3295c949.png";
@@ -843,9 +843,9 @@ export default function Home() {
 
                     <div className="pt-4 border-t border-border">
                       <h3 className="font-semibold text-foreground mb-3">Connect With Us</h3>
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 flex-wrap">
                         <a 
-                          href="https://instagram.com/ramanifashion" 
+                          href="https://www.instagram.com/ramanifashionindia/" 
                           target="_blank" 
                           rel="noopener noreferrer" 
                           className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all shadow-sm hover:shadow-md"
@@ -856,7 +856,18 @@ export default function Home() {
                           <span className="text-sm font-medium">Instagram</span>
                         </a>
                         <a 
-                          href="https://wa.me/915555555555" 
+                          href="https://www.facebook.com/186191114586811" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-sm hover:shadow-md"
+                          data-testid="link-facebook"
+                          aria-label="Facebook"
+                        >
+                          <FaFacebook className="w-5 h-5" />
+                          <span className="text-sm font-medium">Facebook</span>
+                        </a>
+                        <a 
+                          href="https://chat.whatsapp.com/GqIsU9ZF2SJ9buuSKxGFWB" 
                           target="_blank" 
                           rel="noopener noreferrer" 
                           className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition-all shadow-sm hover:shadow-md"
