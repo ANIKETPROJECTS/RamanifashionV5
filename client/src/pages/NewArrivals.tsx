@@ -131,11 +131,15 @@ export default function NewArrivals() {
     queryKey: ["/api/price-range", priceRangeParams.toString()],
   });
 
-  // Update price range when API data changes
+  // Update price range when API data changes - clamp values to new bounds
   useEffect(() => {
     if (priceRangeData) {
       if (priceRangeData.maxPrice > 0) {
-        setPriceRange([priceRangeData.minPrice, priceRangeData.maxPrice]);
+        setPriceRange(prev => {
+          const newMin = Math.max(priceRangeData.minPrice, Math.min(prev[0], priceRangeData.maxPrice));
+          const newMax = Math.min(priceRangeData.maxPrice, Math.max(prev[1], priceRangeData.minPrice));
+          return [newMin, newMax];
+        });
       } else {
         // If no products, use fallback
         setPriceRange([0, 10000]);
