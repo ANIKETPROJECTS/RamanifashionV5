@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -415,7 +416,8 @@ export default function ProductManagement() {
   }
 
   return (
-    <div className="p-6">
+    <AdminLayout>
+      <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold" data-testid="text-page-title">Product Management</h1>
         <div className="flex gap-2 flex-wrap">
@@ -1295,6 +1297,7 @@ export default function ProductManagement() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -146,7 +147,8 @@ export default function InventoryManagement() {
   }
 
   return (
-    <div className="p-6">
+    <AdminLayout>
+      <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold" data-testid="text-page-title">
           Inventory Management
@@ -451,6 +453,7 @@ export default function InventoryManagement() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

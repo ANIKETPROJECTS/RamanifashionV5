@@ -175,14 +175,16 @@ export default function Login() {
                       placeholder="10-digit mobile number"
                       value={formData.phone}
                       onChange={(e) => {
-                        setFormData({ ...formData, phone: e.target.value });
-                        resetOtpState();
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                        setFormData(prev => ({ ...prev, phone: value, otp: '' }));
+                        setOtpSent(false);
+                        setOtpVerified(false);
                       }}
                       required
                       disabled={otpVerified}
-                      autoComplete="tel"
+                      autoComplete="off"
                       inputMode="numeric"
-                      pattern="[0-9]*"
+                      maxLength={10}
                       data-testid="input-phone"
                     />
                     {!otpVerified && (
