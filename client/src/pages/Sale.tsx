@@ -191,8 +191,9 @@ export default function Sale() {
     setSelectedFabrics([]);
     setSelectedColors([]);
     setSelectedOccasions([]);
+    const minPrice = priceRangeData?.minPrice || 0;
     const maxPrice = priceRangeData?.maxPrice || 50000;
-    setPriceRange([0, maxPrice]);
+    setPriceRange([minPrice, maxPrice]);
     setInStockOnly(false);
     setPage(1);
   };
