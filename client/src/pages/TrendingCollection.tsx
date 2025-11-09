@@ -134,8 +134,13 @@ export default function TrendingCollection() {
 
   // Update price range when API data changes
   useEffect(() => {
-    if (priceRangeData && priceRangeData.maxPrice > 0) {
-      setPriceRange([priceRangeData.minPrice, priceRangeData.maxPrice]);
+    if (priceRangeData) {
+      if (priceRangeData.maxPrice > 0) {
+        setPriceRange([priceRangeData.minPrice, priceRangeData.maxPrice]);
+      } else {
+        // If no products, use fallback
+        setPriceRange([0, 10000]);
+      }
     }
   }, [priceRangeData]);
 
