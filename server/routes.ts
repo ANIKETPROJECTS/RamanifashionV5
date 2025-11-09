@@ -67,7 +67,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sort = 'createdAt',
         order = 'desc',
         page = '1',
-        limit = '12'
+        limit = '12',
+        isSale
       } = req.query;
 
       const query: any = {};
@@ -94,6 +95,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.query.isNew === 'true') query.isNew = true;
       if (req.query.isBestseller === 'true') query.isBestseller = true;
       if (req.query.isTrending === 'true') query.isTrending = true;
+      
+      // Filter for sale products (where originalPrice > price)
+      if (isSale === 'true') {
+        query.originalPrice = { $exists: true, $ne: null };
+        query.$expr = { $gt: ['$originalPrice', '$price'] };
+      }
+      
       if (minPrice || maxPrice) {
         query.price = {};
         if (minPrice) query.price.$gte = Number(minPrice);
@@ -603,6 +611,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const occasions = await Product.distinct('occasion');
 
       res.json({ categories, fabrics, colors, occasions });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get dynamic price range based on filters
+  app.get("/api/price-range", async (req, res) => {
+    try {
+      const {
+        category,
+        fabric,
+        color,
+        occasion,
+        inStock,
+        search,
+        isSale
+      } = req.query;
+
+      const query: any = {};
+
+      // Apply the same filters as the products endpoint
+      if (category) {
+        const categories = (category as string).split(',').filter(Boolean);
+        query.category = categories.length > 1 ? { $in: categories } : categories[0];
+      }
+      if (fabric) {
+        const fabrics = (fabric as string).split(',').filter(Boolean);
+        query.fabric = fabrics.length > 1 ? { $in: fabrics } : fabrics[0];
+      }
+      if (color) {
+        const colors = (color as string).split(',').filter(Boolean);
+        query.color = colors.length > 1 ? { $in: colors } : colors[0];
+      }
+      if (occasion) {
+        const occasions = (occasion as string).split(',').filter(Boolean);
+        query.occasion = occasions.length > 1 ? { $in: occasions } : occasions[0];
+      }
+      
+      if (inStock === 'true') query.inStock = true;
+      if (req.query.isNew === 'true') query.isNew = true;
+      if (req.query.isBestseller === 'true') query.isBestseller = true;
+      if (req.query.isTrending === 'true') query.isTrending = true;
+      
+      // Filter for sale products (where originalPrice > price)
+      if (isSale === 'true') {
+        query.originalPrice = { $exists: true, $ne: null };
+        query.$expr = { $gt: ['$originalPrice', '$price'] };
+      }
+      
+      if (search) {
+        query.$text = { $search: search as string };
+      }
+
+      // Use aggregation to get min and max prices
+      const result = await Product.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: null,
+            minPrice: { $min: '$price' },
+            maxPrice: { $max: '$price' }
+          }
+        }
+      ]);
+
+      const priceRange = result.length > 0 
+        ? { minPrice: result[0].minPrice || 0, maxPrice: result[0].maxPrice || 0 }
+        : { minPrice: 0, maxPrice: 0 };
+
+      res.json(priceRange);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
