@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { 
   LayoutDashboard, 
   Package, 
@@ -16,17 +17,23 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location, setLocation] = useLocation();
-  const adminToken = localStorage.getItem("adminToken");
+  const { isLoading, isAuthenticated } = useAdminAuth();
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("admin");
-    setLocation("/login");
+    setLocation("/admin/login");
   };
 
-  if (!adminToken) {
-    setLocation("/login");
-    return null;
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-pink-500 border-r-transparent"></div>
+          <p className="mt-4 text-muted-foreground">Verifying authentication...</p>
+        </div>
+      </div>
+    );
   }
 
   const menuItems = [

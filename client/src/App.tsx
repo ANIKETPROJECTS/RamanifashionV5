@@ -21,6 +21,7 @@ import Profile from "@/pages/Profile";
 import Orders from "@/pages/Orders";
 import Wishlist from "@/pages/Wishlist";
 import NotFound from "@/pages/not-found";
+import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import ProductManagement from "@/pages/admin/ProductManagement";
 import InventoryManagement from "@/pages/admin/InventoryManagement";
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/profile" component={Profile} />
       <Route path="/orders" component={Orders} />
       <Route path="/wishlist" component={Wishlist} />
+      <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/products" component={ProductManagement} />

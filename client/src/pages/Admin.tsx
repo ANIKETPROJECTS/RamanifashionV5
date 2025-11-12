@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -29,8 +30,13 @@ interface Product {
 
 export default function Admin() {
   const { toast } = useToast();
+  const { isLoading: authLoading, isAuthenticated } = useAdminAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  if (authLoading || !isAuthenticated) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">Loading...</div>;
+  }
   
   const [formData, setFormData] = useState({
     name: "",
