@@ -29,7 +29,6 @@ export default function Products() {
   const [selectedFabrics, setSelectedFabrics] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
-  const [inStockOnly, setInStockOnly] = useState(false);
   const [isTrending, setIsTrending] = useState(false);
   const [openSections, setOpenSections] = useState<string[]>(["categories", "price", "fabric"]);
 
@@ -92,9 +91,6 @@ export default function Products() {
   if (selectedOccasions.length > 0) {
     queryParams.append("occasion", selectedOccasions.join(","));
   }
-  if (inStockOnly) {
-    queryParams.append("inStock", "true");
-  }
   if (isTrending) {
     queryParams.append("isTrending", "true");
   }
@@ -130,9 +126,6 @@ export default function Products() {
   }
   if (selectedOccasions.length > 0) {
     priceRangeParams.append("occasion", selectedOccasions.join(","));
-  }
-  if (inStockOnly) {
-    priceRangeParams.append("inStock", "true");
   }
   if (isTrending) {
     priceRangeParams.append("isTrending", "true");
@@ -213,11 +206,10 @@ export default function Products() {
     const maxPrice = priceRangeData?.maxPrice && priceRangeData.maxPrice > 0 ? priceRangeData.maxPrice : 10000;
     setPriceRange([0, maxPrice]);
     setPriceFilterActive(false);
-    setInStockOnly(false);
     setPage(1);
   };
 
-  const activeFiltersCount = selectedCategories.length + selectedFabrics.length + selectedColors.length + selectedOccasions.length + (inStockOnly ? 1 : 0);
+  const activeFiltersCount = selectedCategories.length + selectedFabrics.length + selectedColors.length + selectedOccasions.length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -460,23 +452,6 @@ export default function Products() {
                   </div>
                 </CollapsibleContent>
               </Collapsible>
-
-              <div className="pt-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="inStock"
-                    checked={inStockOnly}
-                    onCheckedChange={(checked) => {
-                      setInStockOnly(checked as boolean);
-                      setPage(1);
-                    }}
-                    data-testid="checkbox-in-stock"
-                  />
-                  <Label htmlFor="inStock" className="text-sm cursor-pointer">
-                    In Stock Only
-                  </Label>
-                </div>
-              </div>
             </div>
           </aside>
 
@@ -780,22 +755,6 @@ export default function Products() {
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
-
-                <div className="pt-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="mobile-inStock"
-                      checked={inStockOnly}
-                      onCheckedChange={(checked) => {
-                        setInStockOnly(checked as boolean);
-                        setPage(1);
-                      }}
-                    />
-                    <Label htmlFor="mobile-inStock" className="text-sm cursor-pointer">
-                      In Stock Only
-                    </Label>
-                  </div>
-                </div>
               </div>
             </SheetContent>
           </Sheet>
