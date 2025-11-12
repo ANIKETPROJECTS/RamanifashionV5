@@ -169,28 +169,11 @@ export default function ProductCard({
           <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
         </Button>
 
-        {(isBestseller || context) && (
+        {isBestseller && (
           <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {isBestseller && (
-              <Badge className="bg-accent text-accent-foreground" data-testid={`badge-bestseller-${id}`}>
-                Bestseller
-              </Badge>
-            )}
-            {context === 'new-arrivals' && (
-              <Badge className="bg-destructive" data-testid={`badge-new-${id}`}>
-                New
-              </Badge>
-            )}
-            {context === 'trending' && (
-              <Badge className="bg-destructive" data-testid={`badge-trending-${id}`}>
-                Trending
-              </Badge>
-            )}
-            {context === 'sale' && (
-              <Badge className="bg-destructive" data-testid={`badge-sale-${id}`}>
-                On Sale
-              </Badge>
-            )}
+            <Badge className="bg-accent text-accent-foreground" data-testid={`badge-bestseller-${id}`}>
+              Bestseller
+            </Badge>
           </div>
         )}
 
