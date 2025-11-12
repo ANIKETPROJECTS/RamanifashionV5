@@ -332,9 +332,9 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
         </div>
       </div>
 
-      <nav className="hidden md:block bg-white">
+      <nav className="hidden md:block bg-white relative">
         <div className="max-w-7xl mx-auto px-4">
-          <NavigationMenu className="relative flex w-full justify-center">
+          <NavigationMenu className="flex w-full justify-center">
             <NavigationMenuList className="flex items-center justify-center gap-8 py-2">
               <NavigationMenuItem>
                 <a 
@@ -371,7 +371,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                 >
                   CATEGORIES
                 </NavigationMenuTrigger>
-                <NavigationMenuContent className="absolute left-1/2 translate-x-[-50%] w-screen max-w-7xl bg-transparent shadow-none border-0">
+                <NavigationMenuContent className="left-0 right-0 mx-auto w-full max-w-7xl bg-transparent shadow-none border-0">
                   <div className="w-full px-6 md:px-12 py-6">
                     <div className="flex flex-nowrap gap-3 md:gap-4 lg:gap-5 justify-center items-start max-w-7xl mx-auto">
                       <Link
