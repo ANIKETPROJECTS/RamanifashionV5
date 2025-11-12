@@ -201,7 +201,7 @@ export default function Login() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="max-w-2xl mx-auto px-4 py-12">
+      <div className="max-w-4xl mx-auto px-4 py-12">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -232,12 +232,12 @@ export default function Login() {
                 <div>
                   <Label className="text-base mb-3 block">Mobile Number</Label>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-center gap-3">
-                      <div className="flex items-center gap-2 bg-secondary/50 px-4 py-3 rounded-full border-2 border-border">
-                        <span className="text-2xl">🇮🇳</span>
-                        <span className="font-bold text-base">+91</span>
+                    <div className="flex items-center gap-2 flex-nowrap">
+                      <div className="flex items-center gap-2 bg-secondary/50 px-3 py-2.5 rounded-full border-2 border-border shrink-0">
+                        <span className="text-xl">🇮🇳</span>
+                        <span className="font-bold text-sm">+91</span>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1.5 flex-nowrap">
                         {phoneDigits.map((digit, index) => (
                           <input
                             key={index}
@@ -249,7 +249,7 @@ export default function Login() {
                             onChange={(e) => handlePhoneDigitChange(index, e.target.value)}
                             onKeyDown={(e) => handlePhoneKeyDown(index, e)}
                             disabled={otpVerified}
-                            className="w-12 h-14 text-center text-xl font-bold border-2 border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-11 h-12 text-center text-lg font-bold border-2 border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                             data-testid={`input-phone-${index}`}
                           />
                         ))}
