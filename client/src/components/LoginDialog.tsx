@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import ramaniLogo from "@/assets/ramani-logo.png";
+import ramaniLogo from "@assets/PNG__B_ LOGO_1762442171742.png";
 
 interface LoginDialogProps {
   open: boolean;
@@ -195,22 +195,24 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       onOpenChange(newOpen);
       if (!newOpen) resetForm();
     }}>
-      <DialogContent className="max-w-4xl p-0 gap-0 overflow-hidden">
-        <div className="grid lg:grid-cols-2 min-h-[500px]">
+      <DialogContent className="max-w-5xl p-0 gap-0 overflow-hidden">
+        <div className="grid lg:grid-cols-2 min-h-[550px]">
           {/* Left Panel - Branding */}
-          <div className="hidden lg:flex flex-col items-center justify-center p-12 bg-gradient-to-br from-pink-50 to-pink-100">
-            <div className="max-w-sm space-y-6">
-              <img 
-                src={ramaniLogo} 
-                alt="Ramani Fashion" 
-                className="w-64 h-auto mx-auto"
-                data-testid="img-ramani-logo"
-              />
-              <div className="space-y-3 text-center">
-                <h2 className="text-2xl font-bold text-gray-800">
+          <div className="hidden lg:flex flex-col items-center justify-center px-16 py-12 bg-gradient-to-br from-pink-50 to-pink-100">
+            <div className="flex flex-col items-center justify-center space-y-8 text-center">
+              <div className="bg-white rounded-lg p-8 shadow-sm">
+                <img 
+                  src={ramaniLogo} 
+                  alt="Ramani Fashion" 
+                  className="w-56 h-auto"
+                  data-testid="img-ramani-logo"
+                />
+              </div>
+              <div className="space-y-4 max-w-sm">
+                <h2 className="text-3xl font-bold text-gray-900">
                   Welcome to Ramani Fashion
                 </h2>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-base leading-relaxed">
                   Discover exquisite sarees and ethnic wear that blend tradition with contemporary elegance
                 </p>
               </div>
@@ -218,11 +220,11 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
           </div>
 
           {/* Right Panel - Form */}
-          <div className="flex flex-col p-8 lg:p-12 bg-white">
+          <div className="flex flex-col justify-center p-8 lg:px-16 lg:py-12 bg-white">
             {step === "phone" ? (
-              <div className="flex-1 flex flex-col justify-center space-y-6">
-                <div className="space-y-2">
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900" data-testid="text-login-title">
+              <div className="space-y-8">
+                <div className="space-y-3">
+                  <h1 className="text-3xl font-bold text-gray-900" data-testid="text-login-title">
                     Enter Mobile Number
                   </h1>
                   <p className="text-sm text-gray-500">
@@ -230,8 +232,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   </p>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-2 border-gray-200 rounded-lg px-4 py-3 focus-within:border-primary transition-colors">
+                <div className="space-y-5">
+                  <div className="flex items-center gap-3 border-2 border-gray-300 rounded-lg px-4 py-3.5 focus-within:border-pink-500 transition-colors">
                     <span className="text-lg">🇮🇳</span>
                     <span className="font-semibold text-sm text-gray-700">+91</span>
                     <div className="flex-1 flex gap-1.5">
@@ -245,23 +247,24 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                           value={digit}
                           onChange={(e) => handlePhoneDigitChange(index, e.target.value)}
                           onKeyDown={(e) => handlePhoneKeyDown(index, e)}
-                          className="w-7 h-9 text-center text-base font-semibold border-b-2 border-gray-300 bg-transparent focus:outline-none focus:border-primary transition-colors"
+                          className="w-7 h-9 text-center text-base font-semibold border-b-2 border-gray-300 bg-transparent focus:outline-none focus:border-pink-500 transition-colors"
                           data-testid={`input-phone-digit-${index}`}
                         />
                       ))}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-2.5">
                     <Checkbox
                       id="notify-updates"
                       checked={notifyUpdates}
                       onCheckedChange={(checked) => setNotifyUpdates(checked === true)}
+                      className="mt-0.5"
                       data-testid="checkbox-notify-updates"
                     />
                     <label
                       htmlFor="notify-updates"
-                      className="text-sm text-gray-600 cursor-pointer"
+                      className="text-sm text-gray-600 cursor-pointer leading-relaxed"
                     >
                       Notify me for any updates & offers
                     </label>
@@ -270,26 +273,26 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   <Button
                     onClick={handleSendOtp}
                     disabled={phoneDigits.join("").length !== 10}
-                    className="w-full rounded-lg h-12 text-base font-semibold bg-pink-500 hover:bg-pink-600"
+                    className="w-full rounded-lg h-12 text-base font-semibold bg-pink-500 hover:bg-pink-600 text-white"
                     data-testid="button-continue"
                   >
                     Continue
                   </Button>
 
-                  <div className="space-y-2 text-center">
-                    <p className="text-xs text-gray-500">
+                  <div className="space-y-3 text-center">
+                    <p className="text-xs text-gray-500 leading-relaxed">
                       I accept that I have read & understood{" "}
-                      <a href="#" className="text-primary hover:underline" data-testid="link-privacy-policy">
+                      <a href="#" className="text-pink-600 hover:underline font-medium" data-testid="link-privacy-policy">
                         Privacy Policy
                       </a>
                       {" "}and{" "}
-                      <a href="#" className="text-primary hover:underline" data-testid="link-terms">
+                      <a href="#" className="text-pink-600 hover:underline font-medium" data-testid="link-terms">
                         T&Cs
                       </a>
                     </p>
                     <a 
                       href="#" 
-                      className="text-sm text-primary hover:underline block" 
+                      className="text-sm text-pink-600 hover:underline font-medium block" 
                       data-testid="link-trouble-login"
                     >
                       Trouble logging in?
@@ -298,9 +301,9 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                 </div>
               </div>
             ) : (
-              <div className="flex-1 flex flex-col justify-center space-y-6">
-                <div className="space-y-2">
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900" data-testid="text-otp-title">
+              <div className="space-y-8">
+                <div className="space-y-3">
+                  <h1 className="text-3xl font-bold text-gray-900" data-testid="text-otp-title">
                     OTP Verification
                   </h1>
                   <p className="text-sm text-gray-500">
@@ -310,7 +313,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                     <span className="font-semibold text-gray-900">+91 {phoneDigits.join("")}</span>
                     <button
                       onClick={handleEdit}
-                      className="text-primary text-sm hover:underline"
+                      className="text-pink-600 text-sm hover:underline font-medium"
                       data-testid="button-edit-phone"
                     >
                       Edit
@@ -318,7 +321,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="flex justify-center gap-3">
                     {otpDigits.map((digit, index) => (
                       <input
@@ -330,7 +333,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                         value={digit}
                         onChange={(e) => handleOtpDigitChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                        className="w-14 h-16 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                        className="w-14 h-16 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
                         data-testid={`input-otp-digit-${index}`}
                       />
                     ))}
@@ -339,7 +342,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   <Button
                     onClick={handleVerifyOtp}
                     disabled={otpDigits.join("").length !== 4 || loginMutation.isPending || registerMutation.isPending}
-                    className="w-full rounded-lg h-12 text-base font-semibold bg-pink-500 hover:bg-pink-600"
+                    className="w-full rounded-lg h-12 text-base font-semibold bg-pink-500 hover:bg-pink-600 text-white"
                     data-testid="button-verify-otp"
                   >
                     {loginMutation.isPending || registerMutation.isPending ? "Verifying..." : "Verify"}
