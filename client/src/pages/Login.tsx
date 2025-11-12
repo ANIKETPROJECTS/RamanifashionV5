@@ -201,7 +201,7 @@ export default function Login() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="max-w-md mx-auto px-4 py-12">
+      <div className="max-w-2xl mx-auto px-4 py-12">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -230,38 +230,40 @@ export default function Login() {
 
               {!isAdminLogin && (
                 <div>
-                  <Label>Mobile Number</Label>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-center gap-2 bg-secondary/50 px-3 py-2 rounded-lg w-fit mx-auto">
-                      <span className="text-2xl">🇮🇳</span>
-                      <span className="font-semibold text-sm">+91</span>
-                    </div>
-                    <div className="flex justify-center gap-1.5">
-                      {phoneDigits.map((digit, index) => (
-                        <input
-                          key={index}
-                          ref={(el) => (phoneInputRefs.current[index] = el)}
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={1}
-                          value={digit}
-                          onChange={(e) => handlePhoneDigitChange(index, e.target.value)}
-                          onKeyDown={(e) => handlePhoneKeyDown(index, e)}
-                          disabled={otpVerified}
-                          className="w-10 h-12 text-center text-lg font-semibold border-2 border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                          data-testid={`input-phone-${index}`}
-                        />
-                      ))}
+                  <Label className="text-base mb-3 block">Mobile Number</Label>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="flex items-center gap-2 bg-secondary/50 px-4 py-3 rounded-full border-2 border-border">
+                        <span className="text-2xl">🇮🇳</span>
+                        <span className="font-bold text-base">+91</span>
+                      </div>
+                      <div className="flex gap-2">
+                        {phoneDigits.map((digit, index) => (
+                          <input
+                            key={index}
+                            ref={(el) => (phoneInputRefs.current[index] = el)}
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={1}
+                            value={digit}
+                            onChange={(e) => handlePhoneDigitChange(index, e.target.value)}
+                            onKeyDown={(e) => handlePhoneKeyDown(index, e)}
+                            disabled={otpVerified}
+                            className="w-12 h-14 text-center text-xl font-bold border-2 border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                            data-testid={`input-phone-${index}`}
+                          />
+                        ))}
+                      </div>
                     </div>
                     {!otpVerified && (
                       <Button
                         type="button"
                         onClick={handleSendOtp}
                         disabled={sendOtpMutation.isPending || formData.phone.length !== 10}
-                        className="w-full rounded-full"
+                        className="w-full rounded-full h-12 text-base font-semibold"
                         data-testid="button-send-otp"
                       >
-                        {otpSent ? "Resend" : "Send OTP"}
+                        {otpSent ? "Resend OTP" : "Send OTP"}
                       </Button>
                     )}
                   </div>
@@ -270,9 +272,9 @@ export default function Login() {
 
               {!isAdminLogin && otpSent && !otpVerified && (
                 <div>
-                  <Label>Enter OTP</Label>
-                  <div className="space-y-3">
-                    <div className="flex justify-center gap-2">
+                  <Label className="text-base mb-3 block">Enter OTP</Label>
+                  <div className="space-y-4">
+                    <div className="flex justify-center gap-3">
                       {otpDigits.map((digit, index) => (
                         <input
                           key={index}
@@ -283,7 +285,7 @@ export default function Login() {
                           value={digit}
                           onChange={(e) => handleOtpDigitChange(index, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                          className="w-12 h-14 text-center text-xl font-bold border-2 border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
+                          className="w-14 h-16 text-center text-2xl font-bold border-2 border-input rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
                           data-testid={`input-otp-${index}`}
                         />
                       ))}
@@ -292,10 +294,10 @@ export default function Login() {
                       type="button"
                       onClick={handleVerifyOtp}
                       disabled={verifyOtpMutation.isPending || formData.otp.length !== 6}
-                      className="w-full rounded-full"
+                      className="w-full rounded-full h-12 text-base font-semibold"
                       data-testid="button-verify-otp"
                     >
-                      Verify
+                      Verify OTP
                     </Button>
                     <p className="text-sm text-muted-foreground text-center">
                       Test OTP: 123456
@@ -305,9 +307,9 @@ export default function Login() {
               )}
 
               {!isAdminLogin && otpVerified && (
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3">
-                  <p className="text-sm text-green-700 dark:text-green-400 flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl p-4">
+                  <p className="text-base text-green-700 dark:text-green-400 flex items-center justify-center gap-2 font-semibold">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     Mobile number verified successfully
@@ -315,38 +317,55 @@ export default function Login() {
                 </div>
               )}
 
-              <div>
-                <Label htmlFor="email">{isAdminLogin ? "Admin Username" : "Email"}</Label>
-                <Input
-                  id="email"
-                  type={isAdminLogin ? "text" : "email"}
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                  data-testid="input-email"
-                />
-              </div>
+              {isAdminLogin && (
+                <>
+                  <div>
+                    <Label htmlFor="email">Admin Username</Label>
+                    <Input
+                      id="email"
+                      type="text"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                      data-testid="input-email"
+                    />
+                  </div>
 
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  data-testid="input-password"
-                />
-              </div>
+                  <div>
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      required
+                      data-testid="input-password"
+                    />
+                  </div>
+                </>
+              )}
 
-              <Button
-                type="submit"
-                className="w-full rounded-full"
-                disabled={loginMutation.isPending || registerMutation.isPending || adminLoginMutation.isPending}
-                data-testid="button-submit"
-              >
-                {isAdminLogin ? "Admin Sign In" : (isRegister ? "Sign Up" : "Sign In")}
-              </Button>
+              {!isAdminLogin && otpVerified && (
+                <Button
+                  type="submit"
+                  className="w-full rounded-full h-12 text-base font-semibold"
+                  disabled={loginMutation.isPending || registerMutation.isPending}
+                  data-testid="button-submit"
+                >
+                  {isRegister ? "Sign Up" : "Sign In"}
+                </Button>
+              )}
+
+              {isAdminLogin && (
+                <Button
+                  type="submit"
+                  className="w-full rounded-full h-12 text-base font-semibold"
+                  disabled={adminLoginMutation.isPending}
+                  data-testid="button-submit"
+                >
+                  Admin Sign In
+                </Button>
+              )}
 
               {!isAdminLogin && (
                 <div className="text-center">
