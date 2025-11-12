@@ -273,7 +273,7 @@ export default function Home() {
                     data-testid={`category-circle-${category.name.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <div 
-                      className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden mb-2 md:mb-3 transition-all duration-300 group-hover:scale-105"
+                      className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden mb-2 md:mb-3 transition-all duration-300 group-hover:scale-105"
                       style={{ 
                         border: '2px solid hsl(338, 78%, 62%)',
                         padding: '3px'
