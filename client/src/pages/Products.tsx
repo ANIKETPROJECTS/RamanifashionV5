@@ -487,8 +487,8 @@ export default function Products() {
                         <ProductCard
                           id={product._id}
                           name={product.name}
-                          image={product.images?.[0] || "/api/placeholder/400/600"}
-                          secondaryImage={product.images?.[1]}
+                          image={product.colorVariants?.[0]?.images?.[0] || product.images?.[0] || "/api/placeholder/400/600"}
+                          secondaryImage={product.colorVariants?.[0]?.images?.[1] || product.images?.[1]}
                           price={product.price}
                           originalPrice={product.originalPrice}
                           discount={discount || undefined}
