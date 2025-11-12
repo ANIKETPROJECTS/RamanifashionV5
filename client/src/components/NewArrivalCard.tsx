@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import { useLocation } from "wouter";
+import placeholderImage from "@assets/stock_images/elegant_saree_produc_6a8286b5.jpg";
 
 interface NewArrivalCardProps {
   id: string;
@@ -36,7 +37,7 @@ export default function NewArrivalCard({
     >
       <div className="relative aspect-[3/5] overflow-hidden bg-gray-100">
         <img
-          src={image}
+          src={image || placeholderImage}
           alt={name}
           className="w-full h-full object-cover"
         />

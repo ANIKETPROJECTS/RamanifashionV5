@@ -79,8 +79,12 @@ export default function Home() {
     queryKey: ["/api/products?isTrending=true&limit=6"],
   });
 
-  const newArrivals = (newArrivalsData as any)?.products || [];
-  const trendingProducts = (trendingData as any)?.products || [];
+  const newArrivals = ((newArrivalsData as any)?.products || []).filter(
+    (product: any) => product.images && product.images.length > 0
+  );
+  const trendingProducts = ((trendingData as any)?.products || []).filter(
+    (product: any) => product.images && product.images.length > 0
+  );
 
   const contactForm = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
