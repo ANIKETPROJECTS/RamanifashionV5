@@ -373,7 +373,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                 </NavigationMenuTrigger>
                 <NavigationMenuContent className="bg-transparent shadow-none border-0">
                   <div className="w-full px-6 md:px-12 py-6">
-                    <div className="flex gap-3 md:gap-4 lg:gap-6 justify-center items-start flex-wrap max-w-7xl mx-auto">
+                    <div className="flex flex-nowrap gap-3 md:gap-4 lg:gap-5 justify-center items-start max-w-7xl mx-auto">
                       <Link
                         href="/products?category=Jamdani Paithani"
                         className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
