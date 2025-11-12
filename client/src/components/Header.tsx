@@ -371,9 +371,9 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                 >
                   CATEGORIES
                 </NavigationMenuTrigger>
-                <NavigationMenuContent className="bg-white shadow-lg">
-                  <div className="w-[95vw] max-w-7xl p-6 overflow-visible">
-                    <div className="flex gap-4 overflow-x-auto pb-4 px-2">
+                <NavigationMenuContent className="bg-white shadow-lg overflow-visible">
+                  <div className="w-[98vw] max-w-[1400px] p-8 overflow-visible">
+                    <div className="flex gap-5 justify-center overflow-x-auto pb-8 px-6">
                       <Link
                         href="/products?category=Jamdani Paithani"
                         className="group flex flex-col items-center flex-shrink-0 transition-transform duration-300 hover:scale-110"
