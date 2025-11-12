@@ -230,12 +230,12 @@ export default function Login() {
 
               {!isAdminLogin && (
                 <div>
-                  <Label className="text-base mb-3 block">Mobile Number</Label>
-                  <div className="space-y-4">
+                  <Label className="text-sm mb-2 block">Mobile Number</Label>
+                  <div className="space-y-3">
                     <div className="flex items-center gap-2 flex-nowrap">
-                      <div className="flex items-center gap-2 bg-secondary/50 px-3 py-2.5 rounded-full border-2 border-border shrink-0">
-                        <span className="text-xl">🇮🇳</span>
-                        <span className="font-bold text-sm">+91</span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span className="text-lg">🇮🇳</span>
+                        <span className="font-semibold text-sm">+91</span>
                       </div>
                       <div className="flex gap-1.5 flex-nowrap">
                         {phoneDigits.map((digit, index) => (
@@ -249,7 +249,7 @@ export default function Login() {
                             onChange={(e) => handlePhoneDigitChange(index, e.target.value)}
                             onKeyDown={(e) => handlePhoneKeyDown(index, e)}
                             disabled={otpVerified}
-                            className="w-11 h-12 text-center text-lg font-bold border-2 border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                            className="w-10 h-11 text-center text-base font-semibold border-2 border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                             data-testid={`input-phone-${index}`}
                           />
                         ))}
@@ -260,7 +260,7 @@ export default function Login() {
                         type="button"
                         onClick={handleSendOtp}
                         disabled={sendOtpMutation.isPending || formData.phone.length !== 10}
-                        className="w-full rounded-full h-12 text-base font-semibold"
+                        className="w-auto px-8 rounded-full h-10 text-sm font-medium mx-auto block"
                         data-testid="button-send-otp"
                       >
                         {otpSent ? "Resend OTP" : "Send OTP"}
@@ -272,9 +272,9 @@ export default function Login() {
 
               {!isAdminLogin && otpSent && !otpVerified && (
                 <div>
-                  <Label className="text-base mb-3 block">Enter OTP</Label>
-                  <div className="space-y-4">
-                    <div className="flex justify-center gap-3">
+                  <Label className="text-sm mb-2 block">Enter OTP</Label>
+                  <div className="space-y-3">
+                    <div className="flex justify-center gap-2">
                       {otpDigits.map((digit, index) => (
                         <input
                           key={index}
@@ -285,7 +285,7 @@ export default function Login() {
                           value={digit}
                           onChange={(e) => handleOtpDigitChange(index, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                          className="w-14 h-16 text-center text-2xl font-bold border-2 border-input rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
+                          className="w-12 h-14 text-center text-xl font-bold border-2 border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
                           data-testid={`input-otp-${index}`}
                         />
                       ))}
@@ -294,12 +294,12 @@ export default function Login() {
                       type="button"
                       onClick={handleVerifyOtp}
                       disabled={verifyOtpMutation.isPending || formData.otp.length !== 6}
-                      className="w-full rounded-full h-12 text-base font-semibold"
+                      className="w-auto px-8 rounded-full h-10 text-sm font-medium mx-auto block"
                       data-testid="button-verify-otp"
                     >
                       Verify OTP
                     </Button>
-                    <p className="text-sm text-muted-foreground text-center">
+                    <p className="text-xs text-muted-foreground text-center">
                       Test OTP: 123456
                     </p>
                   </div>
@@ -307,9 +307,9 @@ export default function Login() {
               )}
 
               {!isAdminLogin && otpVerified && (
-                <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl p-4">
-                  <p className="text-base text-green-700 dark:text-green-400 flex items-center justify-center gap-2 font-semibold">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                  <p className="text-sm text-green-700 dark:text-green-400 flex items-center justify-center gap-2 font-medium">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     Mobile number verified successfully
@@ -348,7 +348,7 @@ export default function Login() {
               {!isAdminLogin && otpVerified && (
                 <Button
                   type="submit"
-                  className="w-full rounded-full h-12 text-base font-semibold"
+                  className="w-full rounded-full h-11 text-base font-semibold"
                   disabled={loginMutation.isPending || registerMutation.isPending}
                   data-testid="button-submit"
                 >
@@ -359,7 +359,7 @@ export default function Login() {
               {isAdminLogin && (
                 <Button
                   type="submit"
-                  className="w-full rounded-full h-12 text-base font-semibold"
+                  className="w-full rounded-full h-11 text-base font-semibold"
                   disabled={adminLoginMutation.isPending}
                   data-testid="button-submit"
                 >
