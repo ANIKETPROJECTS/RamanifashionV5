@@ -372,14 +372,14 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                   CATEGORIES
                 </NavigationMenuTrigger>
                 <NavigationMenuContent className="bg-white shadow-lg">
-                  <div className="w-[95vw] max-w-7xl p-6">
-                    <div className="flex gap-4 overflow-x-auto pb-2">
+                  <div className="w-[95vw] max-w-7xl p-6 overflow-visible">
+                    <div className="flex gap-4 overflow-x-auto pb-4 px-2">
                       <Link
                         href="/products?category=Jamdani Paithani"
-                        className="group flex flex-col items-center flex-shrink-0"
+                        className="group flex flex-col items-center flex-shrink-0 transition-transform duration-300 hover:scale-110"
                         data-testid="category-jamdani-paithani"
                       >
-                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent hover:border-pink-500 transition-all">
+                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                           <img
                             src={paithaniImage}
                             alt="Jamdani Paithani"
@@ -395,10 +395,10 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
 
                       <Link
                         href="/products?category=Khun Irkal"
-                        className="group flex flex-col items-center flex-shrink-0"
+                        className="group flex flex-col items-center flex-shrink-0 transition-transform duration-300 hover:scale-110"
                         data-testid="category-khun-irkal"
                       >
-                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent hover:border-pink-500 transition-all">
+                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                           <img
                             src={khunIrkalImage}
                             alt="Khun / Irkal (Ilkal)"
@@ -414,10 +414,10 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
 
                       <Link
                         href="/products?category=Ajrakh Modal"
-                        className="group flex flex-col items-center flex-shrink-0"
+                        className="group flex flex-col items-center flex-shrink-0 transition-transform duration-300 hover:scale-110"
                         data-testid="category-ajrakh-modal"
                       >
-                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent hover:border-pink-500 transition-all">
+                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                           <img
                             src={ajrakhModalImage}
                             alt="Ajrakh Modal"
@@ -433,10 +433,10 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
 
                       <Link
                         href="/products?category=Mul Mul Cotton"
-                        className="group flex flex-col items-center flex-shrink-0"
+                        className="group flex flex-col items-center flex-shrink-0 transition-transform duration-300 hover:scale-110"
                         data-testid="category-mul-mul-cotton"
                       >
-                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent hover:border-pink-500 transition-all">
+                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                           <img
                             src={mulCottonImage}
                             alt="Mul Mul Cotton"
@@ -452,10 +452,10 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
 
                       <Link
                         href="/products?category=Khadi Cotton"
-                        className="group flex flex-col items-center flex-shrink-0"
+                        className="group flex flex-col items-center flex-shrink-0 transition-transform duration-300 hover:scale-110"
                         data-testid="category-khadi-cotton"
                       >
-                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent hover:border-pink-500 transition-all">
+                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                           <img
                             src={khadiCottonImage}
                             alt="Khadi Cotton"
@@ -471,10 +471,10 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
 
                       <Link
                         href="/products?category=Patch Work"
-                        className="group flex flex-col items-center flex-shrink-0"
+                        className="group flex flex-col items-center flex-shrink-0 transition-transform duration-300 hover:scale-110"
                         data-testid="category-patch-work"
                       >
-                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent hover:border-pink-500 transition-all">
+                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                           <img
                             src={patchWorkImage}
                             alt="Patch Work"
@@ -490,10 +490,10 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
 
                       <Link
                         href="/products?category=Pure Linen"
-                        className="group flex flex-col items-center flex-shrink-0"
+                        className="group flex flex-col items-center flex-shrink-0 transition-transform duration-300 hover:scale-110"
                         data-testid="category-pure-linen"
                       >
-                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent hover:border-pink-500 transition-all">
+                        <div className="relative w-32 md:w-40 aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                           <img
                             src={pureLinenImage}
                             alt="Pure Linen"
