@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**November 12, 2025 - Color Variant Image Display in Product Grids:**
+- **Fixed Image Display Logic:** Updated all product grid views to prioritize images from `colorVariants[0].images` before falling back to legacy `images` array
+- **Consistent Fallback Behavior:** Applied image resolution pattern: `product.colorVariants?.[0]?.images?.[0] || product.images?.[0] || "/placeholder.jpg"`
+- **Updated Files:** NewArrivals.tsx, Products.tsx, TrendingCollection.tsx, Sale.tsx
+- **Impact:**
+  - All product grid views now consistently display the correct product images from color variants
+  - Products with only color variant images (no legacy images array) now display properly
+  - Maintains backward compatibility with products that still use legacy images array
+- **Architecture:** All listing pages use ProductCard component which now properly resolves images from color variants first
+
 **November 9, 2025 - Dynamic Price Ranges & Automatic Sale Filtering:**
 - **Automatic Sale Detection:** Products with originalPrice > sellingPrice now automatically appear in sale section without manual isSale flag
 - **Dynamic Price Range Filters:** Price sliders now automatically adjust based on actual product prices in database and active filters
