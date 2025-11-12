@@ -9,27 +9,28 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { ColorVariantEditor, ColorVariant } from "@/components/ColorVariantEditor";
 import { 
   Upload,
   Download,
-  FileUp,
-  X,
-  Link as LinkIcon
+  FileUp
 } from "lucide-react";
+
+const AVAILABLE_COLORS = [
+  "Red", "Blue", "Green", "Pink", "Yellow", "Black", "White", "Purple", 
+  "Maroon", "Grey", "Orange", "Beige", "Brown", "Gold", "Silver", 
+  "Navy", "Turquoise", "Magenta", "Cream", "Burgundy", "Peach", "Lavender"
+];
 
 export default function ProductManagement() {
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
   const adminToken = localStorage.getItem("adminToken");
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const excelImportRef = useRef<HTMLInputElement>(null);
 
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
+  const [colorVariants, setColorVariants] = useState<ColorVariant[]>([]);
 
   const [productForm, setProductForm] = useState({
     name: "",
@@ -39,7 +40,6 @@ export default function ProductManagement() {
     category: "",
     subcategory: "",
     fabric: "",
-    color: "",
     occasion: "",
     pattern: "",
     workType: "",
@@ -58,93 +58,6 @@ export default function ProductManagement() {
     countryOfOrigin: ""
   });
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    if (uploadedImages.length + files.length > 5) {
-      toast({ 
-        title: "Too many images", 
-        description: "Maximum 5 images allowed per product",
-        variant: "destructive" 
-      });
-      return;
-    }
-
-    setIsUploading(true);
-    const formData = new FormData();
-    
-    for (let i = 0; i < files.length; i++) {
-      formData.append('images', files[i]);
-    }
-
-    try {
-      const response = await fetch('/api/admin/upload-images', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${adminToken}`
-        },
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const data = await response.json();
-      setUploadedImages([...uploadedImages, ...data.urls]);
-      toast({ title: "Images uploaded successfully!" });
-      
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    } catch (error: any) {
-      toast({ 
-        title: "Upload failed", 
-        description: error.message,
-        variant: "destructive" 
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setUploadedImages(uploadedImages.filter((_, i) => i !== index));
-  };
-
-  const handleAddImageUrl = () => {
-    if (!imageUrl.trim()) {
-      toast({ 
-        title: "URL required", 
-        description: "Please enter a valid image URL",
-        variant: "destructive" 
-      });
-      return;
-    }
-
-    if (uploadedImages.length >= 5) {
-      toast({ 
-        title: "Too many images", 
-        description: "Maximum 5 images allowed per product",
-        variant: "destructive" 
-      });
-      return;
-    }
-
-    try {
-      new URL(imageUrl);
-      setUploadedImages([...uploadedImages, imageUrl]);
-      setImageUrl("");
-      toast({ title: "Image URL added successfully!" });
-    } catch (error) {
-      toast({ 
-        title: "Invalid URL", 
-        description: "Please enter a valid image URL",
-        variant: "destructive" 
-      });
-    }
-  };
 
   const importExcelMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -247,7 +160,6 @@ export default function ProductManagement() {
       category: "",
       subcategory: "",
       fabric: "",
-      color: "",
       occasion: "",
       pattern: "",
       workType: "",
@@ -265,12 +177,21 @@ export default function ProductManagement() {
       careInstructions: "",
       countryOfOrigin: ""
     });
-    setUploadedImages([]);
+    setColorVariants([]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (colorVariants.length === 0) {
+      toast({ 
+        title: "At least one color variant required", 
+        description: "Please add at least one color with images",
+        variant: "destructive" 
+      });
+      return;
+    }
+
     const formattedData = {
       name: productForm.name,
       description: productForm.description,
@@ -279,7 +200,7 @@ export default function ProductManagement() {
       category: productForm.category,
       subcategory: productForm.subcategory || undefined,
       fabric: productForm.fabric || undefined,
-      color: productForm.color || undefined,
+      colorVariants: colorVariants,
       occasion: productForm.occasion || undefined,
       pattern: productForm.pattern || undefined,
       workType: productForm.workType || undefined,
@@ -291,7 +212,6 @@ export default function ProductManagement() {
       isTrending: productForm.isTrending,
       isBestseller: productForm.isBestseller,
       onSale: productForm.onSale,
-      images: uploadedImages,
       specifications: {
         fabricComposition: productForm.fabricComposition || undefined,
         dimensions: productForm.dimensions || undefined,
@@ -349,96 +269,12 @@ export default function ProductManagement() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label data-testid="label-product-images">Product Images (Max 5)</Label>
-                <div className="flex gap-2 flex-wrap">
-                  {uploadedImages.map((url, index) => (
-                    <div key={index} className="relative group">
-                      <img 
-                        src={url} 
-                        alt={`Product ${index + 1}`}
-                        className="w-20 h-20 object-cover rounded-md"
-                        data-testid={`img-uploaded-${index}`}
-                      />
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="destructive"
-                        className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100"
-                        onClick={() => removeImage(index)}
-                        data-testid={`button-remove-image-${index}`}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-                {uploadedImages.length < 5 && (
-                  <Tabs defaultValue="device" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="device" data-testid="tab-upload-device">
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload from Device
-                      </TabsTrigger>
-                      <TabsTrigger value="url" data-testid="tab-upload-url">
-                        <LinkIcon className="mr-2 h-4 w-4" />
-                        Upload via Link
-                      </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="device" className="space-y-2">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        className="hidden"
-                        onChange={handleImageUpload}
-                        data-testid="input-file-upload-hidden"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        data-testid="button-upload-images"
-                      >
-                        <Upload className="mr-2 h-4 w-4" />
-                        {isUploading ? "Uploading..." : "Upload Images"}
-                      </Button>
-                      <p className="text-xs text-muted-foreground">
-                        Max file size: 50 MB. Supports JPEG, PNG, GIF, and WebP.
-                      </p>
-                    </TabsContent>
-                    <TabsContent value="url" className="space-y-2">
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
-                          value={imageUrl}
-                          onChange={(e) => setImageUrl(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleAddImageUrl();
-                            }
-                          }}
-                          data-testid="input-image-url"
-                        />
-                        <Button
-                          type="button"
-                          onClick={handleAddImageUrl}
-                          data-testid="button-add-url"
-                        >
-                          Add
-                        </Button>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Enter a direct link to an image (up to 50 MB).
-                      </p>
-                    </TabsContent>
-                  </Tabs>
-                )}
-              </div>
+              <ColorVariantEditor
+                variants={colorVariants}
+                onChange={setColorVariants}
+                availableColors={AVAILABLE_COLORS}
+                adminToken={adminToken}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -528,16 +364,6 @@ export default function ProductManagement() {
                     value={productForm.fabric}
                     onChange={(e) => setProductForm({...productForm, fabric: e.target.value})}
                     data-testid="input-fabric"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="color" data-testid="label-color">Color</Label>
-                  <Input
-                    id="color"
-                    value={productForm.color}
-                    onChange={(e) => setProductForm({...productForm, color: e.target.value})}
-                    data-testid="input-color"
                   />
                 </div>
 

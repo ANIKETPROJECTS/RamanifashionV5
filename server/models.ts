@@ -11,6 +11,26 @@ const productSchema = new Schema({
   subcategory: { type: String },
   fabric: { type: String },
   color: { type: String },
+  colorVariants: {
+    type: [{
+      color: { type: String, required: true },
+      images: { 
+        type: [{ type: String, required: true }],
+        validate: {
+          validator: function(v: string[]) {
+            return v && v.length >= 1 && v.length <= 5 && v.every(url => url && url.trim().length > 0);
+          },
+          message: 'Each color variant must have between 1 and 5 non-empty image URLs'
+        }
+      }
+    }],
+    validate: {
+      validator: function(v: any[]) {
+        return v && v.length >= 1;
+      },
+      message: 'Product must have at least one color variant'
+    }
+  },
   occasion: { type: String },
   pattern: { type: String },
   workType: { type: String },
