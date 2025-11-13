@@ -424,6 +424,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/customer/profile", authenticateToken, async (req, res) => {
+    try {
+      const userType = (req as any).user.type;
+      
+      if (userType !== 'customer') {
+        return res.status(403).json({ error: 'Only customers can update their profile' });
+      }
+
+      const { name, email, dob, address } = req.body;
+      const customerId = (req as any).user.userId;
+
+      const customer = await Customer.findById(customerId);
+      if (!customer) {
+        return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      // Update optional fields
+      if (name !== undefined) customer.name = name;
+      if (email !== undefined) customer.email = email;
+      if (dob !== undefined) customer.dob = dob ? new Date(dob) : undefined;
+      if (address !== undefined) {
+        customer.address = {
+          street: address.street || customer.address?.street,
+          city: address.city || customer.address?.city,
+          state: address.state || customer.address?.state,
+          pincode: address.pincode || customer.address?.pincode,
+          landmark: address.landmark || customer.address?.landmark,
+        };
+      }
+
+      customer.updatedAt = new Date();
+      await customer.save();
+
+      res.json({
+        message: 'Profile updated successfully',
+        customer: {
+          id: customer._id,
+          phone: customer.phone,
+          name: customer.name,
+          email: customer.email,
+          dob: customer.dob,
+          address: customer.address,
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Cart Routes
   app.get("/api/cart", authenticateToken, async (req, res) => {
     try {

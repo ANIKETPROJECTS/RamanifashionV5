@@ -11,14 +11,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { User, MapPin, Trash2, Plus } from "lucide-react";
+import { User, MapPin, Trash2, Plus, Calendar, Mail, Edit2 } from "lucide-react";
 
 export default function Profile() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<any>(null);
+  const [editingProfile, setEditingProfile] = useState(false);
   
+  const [profileData, setProfileData] = useState({
+    name: "",
+    email: "",
+    dob: "",
+  });
+
   const [addressData, setAddressData] = useState({
     fullName: "",
     phone: "",
@@ -46,6 +53,33 @@ export default function Profile() {
       setLocation("/login");
     }
   }, [user, userLoading, userError, setLocation]);
+
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: user.name || "",
+        email: user.email || "",
+        dob: user.dob ? new Date(user.dob).toISOString().split('T')[0] : "",
+      });
+    }
+  }, [user]);
+
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: typeof profileData) => 
+      apiRequest("/api/customer/profile", "PUT", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      setEditingProfile(false);
+      toast({ title: "Profile updated successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: "Failed to update profile", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    },
+  });
 
   const createAddressMutation = useMutation({
     mutationFn: (data: any) => apiRequest("/api/addresses", "POST", data),
@@ -157,29 +191,127 @@ export default function Profile() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5" />
                   Profile Details
                 </CardTitle>
+                {!editingProfile && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditingProfile(true)}
+                    data-testid="button-edit-profile"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                )}
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label className="text-muted-foreground">Name</Label>
-                  <p className="font-semibold" data-testid="text-user-name">{(user as any).name}</p>
-                </div>
-                <Separator />
-                <div>
-                  <Label className="text-muted-foreground">Email</Label>
-                  <p className="font-semibold" data-testid="text-user-email">{(user as any).email}</p>
-                </div>
-                {(user as any).phone && (
+                {editingProfile ? (
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    updateProfileMutation.mutate(profileData);
+                  }} className="space-y-4">
+                    <div>
+                      <Label htmlFor="profile-name">Name</Label>
+                      <Input
+                        id="profile-name"
+                        value={profileData.name}
+                        onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                        placeholder="Enter your name"
+                        data-testid="input-profile-name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="profile-email">Email</Label>
+                      <Input
+                        id="profile-email"
+                        type="email"
+                        value={profileData.email}
+                        onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                        placeholder="Enter your email"
+                        data-testid="input-profile-email"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="profile-dob">Date of Birth</Label>
+                      <Input
+                        id="profile-dob"
+                        type="date"
+                        value={profileData.dob}
+                        onChange={(e) => setProfileData({ ...profileData, dob: e.target.value })}
+                        data-testid="input-profile-dob"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        type="submit" 
+                        size="sm"
+                        disabled={updateProfileMutation.isPending}
+                        data-testid="button-save-profile"
+                      >
+                        {updateProfileMutation.isPending ? "Saving..." : "Save"}
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setEditingProfile(false);
+                          setProfileData({
+                            name: user.name || "",
+                            email: user.email || "",
+                            dob: user.dob ? new Date(user.dob).toISOString().split('T')[0] : "",
+                          });
+                        }}
+                        data-testid="button-cancel-profile"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
                   <>
-                    <Separator />
                     <div>
                       <Label className="text-muted-foreground">Phone</Label>
                       <p className="font-semibold" data-testid="text-user-phone">{(user as any).phone}</p>
+                      <span className="text-xs text-green-600">Verified</span>
                     </div>
+                    <Separator />
+                    <div>
+                      <Label className="text-muted-foreground flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Name
+                      </Label>
+                      <p className="font-semibold" data-testid="text-user-name">
+                        {(user as any).name || <span className="text-muted-foreground">Not set</span>}
+                      </p>
+                    </div>
+                    <Separator />
+                    <div>
+                      <Label className="text-muted-foreground flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        Email
+                      </Label>
+                      <p className="font-semibold" data-testid="text-user-email">
+                        {(user as any).email || <span className="text-muted-foreground">Not set</span>}
+                      </p>
+                    </div>
+                    {(user as any).dob && (
+                      <>
+                        <Separator />
+                        <div>
+                          <Label className="text-muted-foreground flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            Date of Birth
+                          </Label>
+                          <p className="font-semibold" data-testid="text-user-dob">
+                            {new Date((user as any).dob).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </>
+                    )}
                   </>
                 )}
               </CardContent>
