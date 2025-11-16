@@ -1,6 +1,7 @@
 interface CartItem {
   productId: string;
   quantity: number;
+  selectedColor?: string;
 }
 
 interface LocalCart {
@@ -27,22 +28,26 @@ export const localStorageService = {
     window.dispatchEvent(new CustomEvent('cartUpdated'));
   },
 
-  addToCart(productId: string, quantity: number = 1): void {
+  addToCart(productId: string, quantity: number = 1, selectedColor?: string): void {
     const cart = this.getCart();
-    const existingItem = cart.items.find(item => item.productId === productId);
+    const existingItem = cart.items.find(
+      item => item.productId === productId && item.selectedColor === selectedColor
+    );
     
     if (existingItem) {
       existingItem.quantity += quantity;
     } else {
-      cart.items.push({ productId, quantity });
+      cart.items.push({ productId, quantity, selectedColor });
     }
     
     this.setCart(cart);
   },
 
-  updateCartQuantity(productId: string, quantity: number): void {
+  updateCartQuantity(productId: string, quantity: number, selectedColor?: string): void {
     const cart = this.getCart();
-    const item = cart.items.find(item => item.productId === productId);
+    const item = cart.items.find(
+      item => item.productId === productId && item.selectedColor === selectedColor
+    );
     
     if (item) {
       item.quantity = quantity;
@@ -50,9 +55,11 @@ export const localStorageService = {
     }
   },
 
-  removeFromCart(productId: string): void {
+  removeFromCart(productId: string, selectedColor?: string): void {
     const cart = this.getCart();
-    cart.items = cart.items.filter(item => item.productId !== productId);
+    cart.items = cart.items.filter(
+      item => !(item.productId === productId && item.selectedColor === selectedColor)
+    );
     this.setCart(cart);
   },
 

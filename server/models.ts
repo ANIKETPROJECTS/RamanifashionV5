@@ -136,6 +136,7 @@ const cartSchema = new Schema({
   items: [{
     productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
     quantity: { type: Number, required: true, default: 1 },
+    selectedColor: { type: String },
     addedAt: { type: Date, default: Date.now },
   }],
   updatedAt: { type: Date, default: Date.now },
@@ -210,6 +211,7 @@ async function syncCustomerCart(customerId: any) {
     const cartItems = cart?.items.map((item: any) => ({
       productId: item.productId,
       quantity: item.quantity,
+      selectedColor: item.selectedColor,
       addedAt: item.addedAt
     })) || [];
     

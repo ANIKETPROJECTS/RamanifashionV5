@@ -11,6 +11,7 @@ export async function migrateGuestDataToServer() {
         await apiRequest("/api/cart", "POST", {
           productId: item.productId,
           quantity: item.quantity,
+          selectedColor: item.selectedColor,
         });
       } catch (error) {
         console.error("Failed to migrate cart item:", error);

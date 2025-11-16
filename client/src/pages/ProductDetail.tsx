@@ -60,14 +60,25 @@ export default function ProductDetail() {
     mutationFn: (data: any) => apiRequest("/api/cart", "POST", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      toast({ title: "Added to cart successfully!" });
+      const colorVariants = product.colorVariants && product.colorVariants.length > 0
+        ? product.colorVariants
+        : null;
+      const currentColorVariant = colorVariants && colorVariants[selectedColorIndex];
+      const colorInfo = currentColorVariant ? ` (${currentColorVariant.color})` : '';
+      toast({ title: `Added to cart successfully!${colorInfo}` });
     },
     onError: () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        localStorageService.addToCart(product._id, quantity);
+        const colorVariants = product.colorVariants && product.colorVariants.length > 0
+          ? product.colorVariants
+          : null;
+        const currentColorVariant = colorVariants && colorVariants[selectedColorIndex];
+        const selectedColor = currentColorVariant?.color;
+        localStorageService.addToCart(product._id, quantity, selectedColor);
         queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-        toast({ title: "Added to cart successfully!" });
+        const colorInfo = selectedColor ? ` (${selectedColor})` : '';
+        toast({ title: `Added to cart successfully!${colorInfo}` });
       } else {
         toast({ title: "Failed to add to cart", variant: "destructive" });
       }
@@ -110,7 +121,16 @@ export default function ProductDetail() {
       openLogin();
       return;
     }
-    buyNowMutation.mutate({ productId: product._id, quantity });
+    const colorVariants = product.colorVariants && product.colorVariants.length > 0
+      ? product.colorVariants
+      : null;
+    const currentColorVariant = colorVariants && colorVariants[selectedColorIndex];
+    const selectedColor = currentColorVariant?.color;
+    buyNowMutation.mutate({ 
+      productId: product._id, 
+      quantity,
+      selectedColor 
+    });
   };
 
   if (isLoading) {
@@ -333,7 +353,14 @@ export default function ProductDetail() {
               <Button
                 className="flex-1 min-w-[140px] rounded-full"
                 disabled={!product.inStock || addToCartMutation.isPending}
-                onClick={() => addToCartMutation.mutate({ productId: product._id, quantity })}
+                onClick={() => {
+                  const selectedColor = currentColorVariant?.color;
+                  addToCartMutation.mutate({ 
+                    productId: product._id, 
+                    quantity,
+                    selectedColor 
+                  });
+                }}
                 data-testid="button-add-to-cart"
               >
                 <ShoppingBag className="h-4 w-4 mr-2" />

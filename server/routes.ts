@@ -497,7 +497,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cart = await Cart.findOne({ userId: (req as any).user.userId })
         .populate('items.productId')
         .lean();
-      res.json(cart || { items: [] });
+      
+      if (!cart) {
+        return res.json({ items: [] });
+      }
+      
+      const cartWithColors = {
+        ...cart,
+        items: cart.items.map((item: any) => ({
+          ...item,
+          selectedColor: item.selectedColor ?? null
+        }))
+      };
+      
+      res.json(cartWithColors);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -505,7 +518,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/cart", authenticateToken, async (req, res) => {
     try {
-      const { productId, quantity = 1 } = req.body;
+      const { productId, quantity = 1, selectedColor } = req.body;
       const userId = (req as any).user.userId;
 
       let cart = await Cart.findOne({ userId });
@@ -515,13 +528,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const existingItem = cart.items.find(
-        (item: any) => item.productId.toString() === productId
+        (item: any) => {
+          const productMatch = item.productId.toString() === productId;
+          const colorMatch = (item.selectedColor || undefined) === (selectedColor || undefined);
+          return productMatch && colorMatch;
+        }
       );
 
       if (existingItem) {
         existingItem.quantity += quantity;
       } else {
-        cart.items.push({ productId, quantity });
+        cart.items.push({ productId, quantity, selectedColor });
       }
 
       cart.updatedAt = new Date();
@@ -536,7 +553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/cart/:productId", authenticateToken, async (req, res) => {
     try {
-      const { quantity } = req.body;
+      const { quantity, selectedColor } = req.body;
       const userId = (req as any).user.userId;
       const { productId } = req.params;
 
@@ -546,7 +563,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const item = cart.items.find(
-        (item: any) => item.productId.toString() === productId
+        (item: any) => {
+          const productMatch = item.productId.toString() === productId;
+          const colorMatch = (item.selectedColor || undefined) === (selectedColor || undefined);
+          return productMatch && colorMatch;
+        }
       );
 
       if (!item) {
@@ -568,6 +589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = (req as any).user.userId;
       const { productId } = req.params;
+      const { selectedColor } = req.body;
 
       const cart = await Cart.findOne({ userId });
       if (!cart) {
@@ -575,7 +597,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       cart.items = cart.items.filter(
-        (item: any) => item.productId.toString() !== productId
+        (item: any) => {
+          const productMatch = item.productId.toString() === productId;
+          const colorMatch = (item.selectedColor || undefined) === (selectedColor || undefined);
+          return !(productMatch && colorMatch);
+        }
       );
       cart.updatedAt = new Date();
       await cart.save();

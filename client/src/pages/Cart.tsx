@@ -31,7 +31,7 @@ export default function Cart() {
         const productPromises = localCart.items.map(async (item) => {
           const response = await fetch(`/api/products/${item.productId}`);
           const product = await response.json();
-          return { productId: product, quantity: item.quantity };
+          return { productId: product, quantity: item.quantity, selectedColor: item.selectedColor };
         });
         const items = await Promise.all(productPromises);
         setGuestCart({ items });
@@ -45,12 +45,12 @@ export default function Cart() {
   }, [token]);
 
   const updateQuantityMutation = useMutation({
-    mutationFn: ({ productId, quantity }: { productId: string; quantity: number }) => {
+    mutationFn: ({ productId, quantity, selectedColor }: { productId: string; quantity: number; selectedColor?: string }) => {
       if (!token) {
-        localStorageService.updateCartQuantity(productId, quantity);
+        localStorageService.updateCartQuantity(productId, quantity, selectedColor);
         return Promise.resolve();
       }
-      return apiRequest(`/api/cart/${productId}`, "PUT", { quantity });
+      return apiRequest(`/api/cart/${productId}`, "PUT", { quantity, selectedColor });
     },
     onSuccess: () => {
       if (token) {
@@ -61,7 +61,7 @@ export default function Cart() {
           const productPromises = localCart.items.map(async (item) => {
             const response = await fetch(`/api/products/${item.productId}`);
             const product = await response.json();
-            return { productId: product, quantity: item.quantity };
+            return { productId: product, quantity: item.quantity, selectedColor: item.selectedColor };
           });
           const items = await Promise.all(productPromises);
           setGuestCart({ items });
@@ -72,12 +72,12 @@ export default function Cart() {
   });
 
   const removeItemMutation = useMutation({
-    mutationFn: (productId: string) => {
+    mutationFn: ({ productId, selectedColor }: { productId: string; selectedColor?: string }) => {
       if (!token) {
-        localStorageService.removeFromCart(productId);
+        localStorageService.removeFromCart(productId, selectedColor);
         return Promise.resolve();
       }
-      return apiRequest(`/api/cart/${productId}`, "DELETE");
+      return apiRequest(`/api/cart/${productId}`, "DELETE", { selectedColor });
     },
     onSuccess: () => {
       if (token) {
@@ -88,7 +88,7 @@ export default function Cart() {
           const productPromises = localCart.items.map(async (item) => {
             const response = await fetch(`/api/products/${item.productId}`);
             const product = await response.json();
-            return { productId: product, quantity: item.quantity };
+            return { productId: product, quantity: item.quantity, selectedColor: item.selectedColor };
           });
           const items = await Promise.all(productPromises);
           setGuestCart({ items });
@@ -159,25 +159,34 @@ export default function Cart() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
-            {items.map((item: any) => (
-              <Card key={item.productId?._id || item._id}>
+            {items.map((item: any) => {
+              const product = item.productId;
+              const selectedColorVariant = item.selectedColor && product?.colorVariants
+                ? product.colorVariants.find((v: any) => v.color === item.selectedColor)
+                : null;
+              const displayImage = selectedColorVariant?.images?.[0] 
+                || product?.images?.[0] 
+                || "/api/placeholder/120/150";
+              
+              return (
+              <Card key={`${item.productId?._id}-${item.selectedColor || 'default'}`}>
                 <CardContent className="p-4">
                   <div className="flex gap-4">
                     <img
-                      src={item.productId?.images?.[0] || "/api/placeholder/120/150"}
-                      alt={item.productId?.name}
+                      src={displayImage}
+                      alt={product?.name}
                       className="w-24 h-32 object-cover rounded-md"
-                      data-testid={`img-product-${item.productId?._id}`}
+                      data-testid={`img-product-${product?._id}`}
                     />
                     
                     <div className="flex-1">
-                      <h3 className="font-semibold mb-2" data-testid={`text-product-name-${item.productId?._id}`}>
-                        {item.productId?.name}
+                      <h3 className="font-semibold mb-2" data-testid={`text-product-name-${product?._id}`}>
+                        {product?.name}
                       </h3>
                       
                       <div className="text-sm text-muted-foreground mb-2">
-                        {item.productId?.fabric && <span>{item.productId.fabric} • </span>}
-                        {item.productId?.color}
+                        {product?.fabric && <span>{product.fabric} • </span>}
+                        {item.selectedColor && <span className="font-medium text-foreground">{item.selectedColor}</span>}
                       </div>
 
                       <div className="flex items-center gap-4">
@@ -198,7 +207,8 @@ export default function Cart() {
                             size="sm"
                             onClick={() => updateQuantityMutation.mutate({
                               productId: item.productId._id,
-                              quantity: Math.max(1, item.quantity - 1)
+                              quantity: Math.max(1, item.quantity - 1),
+                              selectedColor: item.selectedColor
                             })}
                             disabled={updateQuantityMutation.isPending}
                             data-testid={`button-decrease-${item.productId?._id}`}
@@ -213,7 +223,8 @@ export default function Cart() {
                             size="sm"
                             onClick={() => updateQuantityMutation.mutate({
                               productId: item.productId._id,
-                              quantity: item.quantity + 1
+                              quantity: item.quantity + 1,
+                              selectedColor: item.selectedColor
                             })}
                             disabled={updateQuantityMutation.isPending}
                             data-testid={`button-increase-${item.productId?._id}`}
@@ -225,7 +236,10 @@ export default function Cart() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeItemMutation.mutate(item.productId._id)}
+                          onClick={() => removeItemMutation.mutate({ 
+                            productId: item.productId._id,
+                            selectedColor: item.selectedColor
+                          })}
                           disabled={removeItemMutation.isPending}
                           data-testid={`button-remove-${item.productId?._id}`}
                         >
@@ -237,7 +251,8 @@ export default function Cart() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            );
+            })}
           </div>
 
           <div>
