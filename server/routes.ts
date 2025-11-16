@@ -381,11 +381,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           phone,
           phoneVerified: true,
           notifyUpdates: notifyUpdates || false,
+          lastLogin: new Date(),
         });
         await customer.save();
       } else {
-        // Update existing customer verification status
+        // Update existing customer verification status and last login
         customer.phoneVerified = true;
+        customer.lastLogin = new Date();
         if (notifyUpdates !== undefined) {
           customer.notifyUpdates = notifyUpdates;
         }
@@ -1505,23 +1507,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/customers", authenticateAdmin, async (req, res) => {
     try {
-      const customers = await User.find().select('-password').lean();
+      const {
+        search,
+        sort = 'createdAt',
+        order = 'desc',
+        page = '1',
+        limit = '50'
+      } = req.query;
+
+      const query: any = {};
+
+      // Search by phone, name, or email
+      if (search) {
+        const searchRegex = new RegExp(search as string, 'i');
+        query.$or = [
+          { phone: searchRegex },
+          { name: searchRegex },
+          { email: searchRegex }
+        ];
+      }
+
+      const pageNum = parseInt(page as string);
+      const limitNum = Math.min(parseInt(limit as string), 100); // Max 100 customers per page
+      const skip = (pageNum - 1) * limitNum;
+
+      // Build sort object
+      const sortObj: any = {};
+      sortObj[sort as string] = order === 'asc' ? 1 : -1;
+
+      // Get total count for pagination
+      const total = await Customer.countDocuments(query);
+
+      // Fetch customers with pagination
+      const customers = await Customer.find(query)
+        .sort(sortObj)
+        .skip(skip)
+        .limit(limitNum)
+        .lean();
       
-      const customersWithStats = await Promise.all(
+      // Enhance customer data with detailed stats
+      const customersWithDetails = await Promise.all(
         customers.map(async (customer) => {
-          const orders = await Order.find({ userId: customer._id }).lean();
-          const wishlist = await Wishlist.findOne({ userId: customer._id }).lean();
+          // Get orders (limit to recent 20 for stats calculation, show only 5 in response)
+          const orders = await Order.find({ userId: customer._id })
+            .sort({ createdAt: -1 })
+            .limit(20)
+            .lean();
+          
+          // Get wishlist with limited product details (only essential fields)
+          const wishlist: any = await Wishlist.findOne({ userId: customer._id })
+            .populate({
+              path: 'products',
+              select: '_id name price images'
+            })
+            .lean();
+          
+          // Calculate stats
+          const totalOrders = orders.length;
+          const totalSpent = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+          const pendingOrders = orders.filter(o => o.orderStatus === 'pending').length;
+          const completedOrders = orders.filter(o => o.orderStatus === 'delivered').length;
+          const wishlistProducts = (wishlist && Array.isArray(wishlist.products)) ? wishlist.products : [];
           
           return {
-            ...customer,
-            totalOrders: orders.length,
-            totalSpent: orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0),
-            wishlistCount: wishlist?.products?.length || 0
+            _id: customer._id,
+            phone: customer.phone,
+            name: customer.name || '',
+            email: customer.email || '',
+            dob: customer.dob,
+            address: customer.address,
+            phoneVerified: customer.phoneVerified,
+            notifyUpdates: customer.notifyUpdates,
+            lastLogin: customer.lastLogin,
+            createdAt: customer.createdAt,
+            updatedAt: customer.updatedAt,
+            stats: {
+              totalOrders,
+              totalSpent,
+              pendingOrders,
+              completedOrders,
+              wishlistCount: wishlistProducts.length
+            },
+            recentOrders: orders.slice(0, 5).map(order => ({
+              orderId: order._id,
+              orderNumber: order.orderNumber,
+              total: order.total,
+              status: order.orderStatus,
+              paymentStatus: order.paymentStatus,
+              createdAt: order.createdAt
+            })),
+            wishlistItems: wishlistProducts
           };
         })
       );
 
-      res.json(customersWithStats);
+      res.json({
+        customers: customersWithDetails,
+        pagination: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages: Math.ceil(total / limitNum)
+        }
+      });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }

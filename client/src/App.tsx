@@ -27,6 +27,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import ProductManagement from "@/pages/admin/ProductManagement";
 import InventoryManagement from "@/pages/admin/InventoryManagement";
 import OrderManagement from "@/pages/admin/OrderManagement";
+import CustomerManagement from "@/pages/admin/CustomerManagement";
 import Analytics from "@/pages/admin/Analytics";
 import Settings from "@/pages/admin/Settings";
 
@@ -55,6 +56,7 @@ function Router() {
       <Route path="/admin/products" component={ProductManagement} />
       <Route path="/admin/inventory" component={InventoryManagement} />
       <Route path="/admin/orders" component={OrderManagement} />
+      <Route path="/admin/customers" component={CustomerManagement} />
       <Route path="/admin/analytics" component={Analytics} />
       <Route path="/admin/settings" component={Settings} />
       <Route component={NotFound} />

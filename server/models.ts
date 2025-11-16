@@ -83,6 +83,7 @@ const customerSchema = new Schema({
   },
   phoneVerified: { type: Boolean, default: false },
   notifyUpdates: { type: Boolean, default: false },
+  lastLogin: { type: Date },
   wishlist: [{
     productId: { type: Schema.Types.ObjectId, ref: 'Product' },
     addedAt: { type: Date, default: Date.now },
