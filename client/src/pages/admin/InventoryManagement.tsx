@@ -205,7 +205,7 @@ export default function InventoryManagement() {
 
   const handleEdit = (product: any) => {
     setEditingProduct(product);
-    const images = product.images || [];
+    const images = product.images || (product.colorVariants && product.colorVariants[0]?.images) || [];
     setUploadedImages(images);
     setProductForm({
       name: product.name || "",
@@ -215,7 +215,7 @@ export default function InventoryManagement() {
       category: product.category || "",
       subcategory: product.subcategory || "",
       fabric: product.fabric || "",
-      color: product.color || "",
+      color: product.color || (product.colorVariants && product.colorVariants[0]?.color) || "",
       occasion: product.occasion || "",
       pattern: product.pattern || "",
       workType: product.workType || "",
@@ -238,6 +238,18 @@ export default function InventoryManagement() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    const colorVariants = editingProduct.colorVariants || [{
+      color: productForm.color || 'Default',
+      images: uploadedImages.length > 0 ? uploadedImages : (editingProduct.images || [])
+    }];
+
+    if (uploadedImages.length > 0 && productForm.color && colorVariants.length > 0) {
+      colorVariants[0] = {
+        color: productForm.color,
+        images: uploadedImages
+      };
+    }
+    
     const formattedData = {
       name: productForm.name,
       description: productForm.description,
@@ -247,6 +259,7 @@ export default function InventoryManagement() {
       subcategory: productForm.subcategory || undefined,
       fabric: productForm.fabric || undefined,
       color: productForm.color || undefined,
+      colorVariants: colorVariants,
       occasion: productForm.occasion || undefined,
       pattern: productForm.pattern || undefined,
       workType: productForm.workType || undefined,
