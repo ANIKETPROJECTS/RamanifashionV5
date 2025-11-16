@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -25,12 +25,11 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [similarSort, setSimilarSort] = useState("rating-desc");
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const [preferenceVersion, setPreferenceVersion] = useState(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setSelectedImage(0);
-    setSelectedColorIndex(0);
   }, [id]);
 
   const { data: product, isLoading } = useQuery({
@@ -42,14 +41,10 @@ export default function ProductDetail() {
     },
   });
 
-  useEffect(() => {
-    if (product && id) {
-      const savedPreference = colorPreferences.getPreference(id);
-      if (savedPreference !== null && product.colorVariants && savedPreference < product.colorVariants.length) {
-        setSelectedColorIndex(savedPreference);
-      }
-    }
-  }, [product, id]);
+  const selectedColorIndex = useMemo(() => {
+    if (!product || !id || product._id !== id) return 0;
+    return colorPreferences.getPreferredVariantIndex(id, product);
+  }, [product, id, preferenceVersion]);
 
   const { data: similarProducts } = useQuery({
     queryKey: ["/api/products", "similar", product?.category, id, similarSort],
@@ -184,10 +179,10 @@ export default function ProductDetail() {
     : 0;
 
   const handleColorChange = (index: number) => {
-    setSelectedColorIndex(index);
     setSelectedImage(0);
     if (id) {
       colorPreferences.setPreference(id, index);
+      setPreferenceVersion(v => v + 1);
     }
   };
 
