@@ -852,6 +852,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/payment/phonepe/test-simulate", authenticateToken, async (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ error: 'This endpoint is only available in development mode' });
+    }
+
+    try {
+      const { merchantOrderId, status } = req.body;
+
+      if (!merchantOrderId || !status) {
+        return res.status(400).json({ error: 'merchantOrderId and status are required' });
+      }
+
+      if (!['success', 'failed'].includes(status)) {
+        return res.status(400).json({ error: 'status must be either "success" or "failed"' });
+      }
+
+      const order = await Order.findOne({ phonePeMerchantOrderId: merchantOrderId });
+      
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      if (order.userId.toString() !== (req as any).user.userId) {
+        return res.status(403).json({ error: 'Unauthorized access to order' });
+      }
+
+      const phonepeState = status === 'success' ? 'COMPLETED' : 'FAILED';
+      const paymentStatus = status === 'success' ? 'paid' : 'failed';
+      
+      await Order.findByIdAndUpdate(order._id, {
+        phonePePaymentState: phonepeState,
+        phonePeTransactionId: `TEST_TXN_${Date.now()}`,
+        paymentStatus,
+        orderStatus: paymentStatus === 'paid' ? 'processing' : order.orderStatus,
+        updatedAt: new Date(),
+      });
+
+      res.json({ 
+        success: true, 
+        message: `Payment ${status} simulated successfully`,
+        state: phonepeState
+      });
+    } catch (error: any) {
+      console.error('Test simulate payment error:', error);
+      res.status(500).json({ error: error.message || 'Failed to simulate payment' });
+    }
+  });
+
   app.post("/api/payment/phonepe/webhook", async (req, res) => {
     try {
       const authHeader = req.headers['authorization'];
