@@ -60,7 +60,15 @@ interface Order {
   total: number;
   paymentMethod: string;
   paymentStatus: 'pending' | 'paid' | 'failed';
-  orderStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  orderStatus: 'pending' | 'approved' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  approved: boolean;
+  approvedBy?: string;
+  approvedAt?: string;
+  phonePeTransactionId?: string;
+  phonePeMerchantOrderId?: string;
+  phonePeOrderId?: string;
+  phonePePaymentState?: string;
+  phonePePaymentDetails?: any;
   createdAt: string;
   updatedAt: string;
 }
@@ -125,6 +133,20 @@ export default function OrderManagement() {
     enabled: !!adminToken
   });
 
+  const approveOrderMutation = useMutation({
+    mutationFn: (orderId: string) => 
+      apiRequest(`/api/admin/orders/${orderId}/approve`, "POST"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+      toast({ title: "Order approved successfully!" });
+      setDetailDialogOpen(false);
+      setSelectedOrder(null);
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, orderStatus, paymentStatus }: any) => 
       apiRequest(`/api/admin/orders/${id}/status`, "PUT", { 
@@ -172,6 +194,7 @@ export default function OrderManagement() {
     if (type === 'order') {
       switch (status) {
         case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+        case 'approved': return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200';
         case 'processing': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
         case 'shipped': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
         case 'delivered': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
@@ -331,6 +354,7 @@ export default function OrderManagement() {
                   <SelectContent>
                     <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="processing">Processing</SelectItem>
                     <SelectItem value="shipped">Shipped</SelectItem>
                     <SelectItem value="delivered">Delivered</SelectItem>
@@ -756,6 +780,66 @@ export default function OrderManagement() {
                     </div>
                   </div>
                 </div>
+
+                {selectedOrder.paymentMethod === 'PhonePe' && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground mb-2">Payment Details (PhonePe)</div>
+                    <div className="bg-muted p-3 rounded-md space-y-1 text-sm">
+                      {selectedOrder.phonePeTransactionId && (
+                        <div><strong>Transaction ID:</strong> {selectedOrder.phonePeTransactionId}</div>
+                      )}
+                      {selectedOrder.phonePeMerchantOrderId && (
+                        <div><strong>Merchant Order ID:</strong> {selectedOrder.phonePeMerchantOrderId}</div>
+                      )}
+                      {selectedOrder.phonePeOrderId && (
+                        <div><strong>PhonePe Order ID:</strong> {selectedOrder.phonePeOrderId}</div>
+                      )}
+                      {selectedOrder.phonePePaymentState && (
+                        <div><strong>Payment State:</strong> {selectedOrder.phonePePaymentState}</div>
+                      )}
+                      {selectedOrder.phonePePaymentDetails && selectedOrder.phonePePaymentDetails.paymentInstrument && (
+                        <>
+                          {selectedOrder.phonePePaymentDetails.paymentInstrument.type && (
+                            <div><strong>Payment Type:</strong> {selectedOrder.phonePePaymentDetails.paymentInstrument.type}</div>
+                          )}
+                          {selectedOrder.phonePePaymentDetails.paymentInstrument.utr && (
+                            <div><strong>UTR:</strong> {selectedOrder.phonePePaymentDetails.paymentInstrument.utr}</div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {selectedOrder.approved && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground mb-2">Approval Information</div>
+                    <div className="bg-green-50 dark:bg-green-950 p-3 rounded-md space-y-1 text-sm">
+                      <div><strong>Approved By:</strong> {selectedOrder.approvedBy || 'Admin'}</div>
+                      <div><strong>Approved At:</strong> {selectedOrder.approvedAt ? format(new Date(selectedOrder.approvedAt), 'dd MMM yyyy, HH:mm') : 'N/A'}</div>
+                    </div>
+                  </div>
+                )}
+
+                {!selectedOrder.approved && selectedOrder.orderStatus === 'pending' && (
+                  <div className="flex gap-2 pt-4 border-t">
+                    <Button
+                      onClick={() => approveOrderMutation.mutate(selectedOrder._id)}
+                      disabled={approveOrderMutation.isPending}
+                      className="flex-1"
+                      data-testid="button-approve-order"
+                    >
+                      {approveOrderMutation.isPending ? 'Approving...' : 'Approve Order'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setDetailDialogOpen(false)}
+                      data-testid="button-close-details"
+                    >
+                      Close
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </DialogContent>
@@ -777,6 +861,7 @@ export default function OrderManagement() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="processing">Processing</SelectItem>
                     <SelectItem value="shipped">Shipped</SelectItem>
                     <SelectItem value="delivered">Delivered</SelectItem>
