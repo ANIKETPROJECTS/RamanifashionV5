@@ -15,6 +15,7 @@ import { ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { motion } from "framer-motion";
+import { colorPreferences } from "@/lib/colorPreferences";
 
 export default function TrendingCollection() {
   const [location] = useLocation();
@@ -461,6 +462,8 @@ export default function TrendingCollection() {
                       ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
                       : 0;
                     
+                    const preferredVariantIndex = colorPreferences.getPreferredVariantIndex(product._id, product);
+                    
                     return (
                       <motion.div
                         key={product._id}
@@ -475,8 +478,8 @@ export default function TrendingCollection() {
                         <ProductCard
                           id={product._id}
                           name={product.name}
-                          image={product.colorVariants?.[0]?.images?.[0] || product.images?.[0] || "/placeholder.jpg"}
-                          secondaryImage={product.colorVariants?.[0]?.images?.[1] || product.images?.[1]}
+                          image={product.colorVariants?.[preferredVariantIndex]?.images?.[0] || product.images?.[0] || "/placeholder.jpg"}
+                          secondaryImage={product.colorVariants?.[preferredVariantIndex]?.images?.[1] || product.images?.[1]}
                           price={product.price}
                           originalPrice={product.originalPrice}
                           discount={discount}

@@ -14,6 +14,7 @@ import { ChevronDown } from "lucide-react";
 import { useLocation, useSearch } from "wouter";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { motion } from "framer-motion";
+import { colorPreferences } from "@/lib/colorPreferences";
 
 export default function Products() {
   const [location] = useLocation();
@@ -473,6 +474,8 @@ export default function Products() {
                       ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
                       : 0;
 
+                    const preferredVariantIndex = colorPreferences.getPreferredVariantIndex(product._id, product);
+
                     return (
                       <motion.div
                         key={product._id}
@@ -487,8 +490,8 @@ export default function Products() {
                         <ProductCard
                           id={product._id}
                           name={product.name}
-                          image={product.colorVariants?.[0]?.images?.[0] || product.images?.[0] || "/api/placeholder/400/600"}
-                          secondaryImage={product.colorVariants?.[0]?.images?.[1] || product.images?.[1]}
+                          image={product.colorVariants?.[preferredVariantIndex]?.images?.[0] || product.images?.[0] || "/api/placeholder/400/600"}
+                          secondaryImage={product.colorVariants?.[preferredVariantIndex]?.images?.[1] || product.images?.[1]}
                           price={product.price}
                           originalPrice={product.originalPrice}
                           discount={discount || undefined}

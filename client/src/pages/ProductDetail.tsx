@@ -33,15 +33,6 @@ export default function ProductDetail() {
     setSelectedColorIndex(0);
   }, [id]);
 
-  useEffect(() => {
-    if (product && id) {
-      const savedPreference = colorPreferences.getPreference(id);
-      if (savedPreference !== null && product.colorVariants && savedPreference < product.colorVariants.length) {
-        setSelectedColorIndex(savedPreference);
-      }
-    }
-  }, [product, id]);
-
   const { data: product, isLoading } = useQuery({
     queryKey: ["/api/products", id],
     queryFn: async () => {
@@ -50,6 +41,15 @@ export default function ProductDetail() {
       return response.json();
     },
   });
+
+  useEffect(() => {
+    if (product && id) {
+      const savedPreference = colorPreferences.getPreference(id);
+      if (savedPreference !== null && product.colorVariants && savedPreference < product.colorVariants.length) {
+        setSelectedColorIndex(savedPreference);
+      }
+    }
+  }, [product, id]);
 
   const { data: similarProducts } = useQuery({
     queryKey: ["/api/products", "similar", product?.category, id, similarSort],

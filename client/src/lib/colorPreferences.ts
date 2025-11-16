@@ -29,6 +29,14 @@ export const colorPreferences = {
     }
   },
 
+  getPreferredVariantIndex(productId: string, product: any): number {
+    const savedPreference = this.getPreference(productId);
+    if (savedPreference !== null && product.colorVariants && savedPreference < product.colorVariants.length) {
+      return savedPreference;
+    }
+    return 0;
+  },
+
   setPreference(productId: string, colorIndex: number): void {
     const customer = auth.getCustomer();
     if (!customer) return;
