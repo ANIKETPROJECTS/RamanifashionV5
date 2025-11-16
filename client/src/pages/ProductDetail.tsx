@@ -15,6 +15,7 @@ import { localStorageService } from "@/lib/localStorage";
 import ProductCard from "@/components/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthUI } from "@/contexts/AuthUIContext";
+import { colorPreferences } from "@/lib/colorPreferences";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +32,15 @@ export default function ProductDetail() {
     setSelectedImage(0);
     setSelectedColorIndex(0);
   }, [id]);
+
+  useEffect(() => {
+    if (product && id) {
+      const savedPreference = colorPreferences.getPreference(id);
+      if (savedPreference !== null && product.colorVariants && savedPreference < product.colorVariants.length) {
+        setSelectedColorIndex(savedPreference);
+      }
+    }
+  }, [product, id]);
 
   const { data: product, isLoading } = useQuery({
     queryKey: ["/api/products", id],
@@ -176,6 +186,9 @@ export default function ProductDetail() {
   const handleColorChange = (index: number) => {
     setSelectedColorIndex(index);
     setSelectedImage(0);
+    if (id) {
+      colorPreferences.setPreference(id, index);
+    }
   };
 
   return (
