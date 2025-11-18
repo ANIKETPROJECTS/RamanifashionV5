@@ -269,18 +269,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const total = await Review.countDocuments({ productId });
       
-      // Calculate rating distribution
-      const ratingDistribution = await Review.aggregate([
-        { $match: { productId: new mongoose.Types.ObjectId(productId) } },
-        { $group: { _id: '$rating', count: { $sum: 1 } } },
-        { $sort: { _id: -1 } }
-      ]);
+      // Calculate rating distribution by fetching all reviews for this product
+      const allReviews = await Review.find({ productId }).select('rating').lean();
       
       const distribution = {
         5: 0, 4: 0, 3: 0, 2: 0, 1: 0
       };
-      ratingDistribution.forEach((item: any) => {
-        distribution[item._id as keyof typeof distribution] = item.count;
+      
+      allReviews.forEach((review: any) => {
+        const rating = review.rating;
+        if (rating >= 1 && rating <= 5) {
+          distribution[rating as keyof typeof distribution]++;
+        }
       });
       
       res.json({
