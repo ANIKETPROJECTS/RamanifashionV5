@@ -133,10 +133,10 @@ export default function ReviewManagement() {
       return apiRequest(`/api/admin/reviews/${review._id}`, "DELETE");
     },
     onSuccess: (data, review) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/reviews"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reviews"], exact: false, refetchType: 'all' });
       if (review.productId?._id) {
-        queryClient.invalidateQueries({ queryKey: ["/api/reviews", review.productId._id], exact: false });
-        queryClient.invalidateQueries({ queryKey: ["/api/products", review.productId._id] });
+        queryClient.invalidateQueries({ queryKey: ["/api/reviews", review.productId._id], exact: false, refetchType: 'all' });
+        queryClient.invalidateQueries({ queryKey: ["/api/products", review.productId._id], exact: false, refetchType: 'all' });
       }
       toast({
         title: "Review deleted",

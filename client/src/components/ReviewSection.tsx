@@ -75,9 +75,9 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
       setTitle("");
       setComment("");
       setRating(5);
-      queryClient.invalidateQueries({ queryKey: ["/api/reviews", productId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/products", productId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/reviews"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews", productId], exact: false, refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ["/api/products", productId], exact: false, refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reviews"], exact: false, refetchType: 'all' });
     },
     onError: (error: any) => {
       toast({
@@ -93,8 +93,8 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
       return await apiRequest(`/api/reviews/${reviewId}/helpful`, "PUT");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/reviews", productId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/reviews"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews", productId], exact: false, refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reviews"], exact: false, refetchType: 'all' });
     },
   });
 
