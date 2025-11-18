@@ -7,6 +7,14 @@ Ramani Fashion India is a full-stack e-commerce web application specializing in 
 ## Recent Changes
 
 ### November 18, 2025
+- **Integrated Shiprocket Shipping Service:** Implemented complete shipping workflow with admin approval process:
+  - Created Shiprocket service module with JWT authentication, token caching, and API integration
+  - Added order approval/rejection endpoints requiring payment completion before approval
+  - Enhanced Order schema with Shiprocket fields (order ID, shipment ID, AWB code, courier details)
+  - Shiprocket order creation happens atomically with approval - orders only marked approved if Shiprocket integration succeeds
+  - Admin UI displays approve/reject buttons for pending paid orders with Shiprocket tracking information
+  - AWB assignment and pickup scheduling handled as non-critical operations
+  - Proper error handling ensures data consistency between database and Shiprocket
 - **Fixed Admin Panel Navigation:** Refactored Analytics component to use shared AdminLayout instead of duplicate sidebar, ensuring all navigation sections (Dashboard, Products, Inventory, Orders, Customers, Reviews) remain visible across all admin pages
 - **Enhanced Real-Time Cache Synchronization:** Implemented cross-cache invalidation between admin panel and customer website for review operations:
   - Customer review submissions now instantly update admin review management panel
@@ -82,6 +90,7 @@ The project is structured into `/client` (frontend), `/server` (backend), `/shar
 ### Third-Party Services
 
 - **WhatsApp Cloud API:** Used for sending OTPs for user authentication.
+- **Shiprocket:** Shipping and logistics service for order fulfillment. Orders are sent to Shiprocket after admin approval. Provides AWB tracking codes, courier assignment, and pickup scheduling.
 
 ### Future Considerations (Not currently implemented)
 
