@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { connectDB } from "./db";
-import { Product, User, Customer, Cart, Wishlist, Order, Address, ContactSubmission, OTP } from "./models";
+import { Product, User, Customer, Cart, Wishlist, Order, Address, ContactSubmission, OTP, Review } from "./models";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import multer from "multer";
@@ -246,6 +246,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // NOTE: Product mutations (create/update/delete) are now exclusively handled 
   // through the /api/admin/products endpoints with admin authentication.
   // Public access to products is read-only via GET /api/products and GET /api/products/:id
+
+  // Review Routes
+  app.get("/api/reviews/:productId", async (req, res) => {
+    try {
+      const { productId } = req.params;
+      const { page = '1', limit = '10', sort = 'createdAt', order = 'desc' } = req.query;
+      
+      const pageNum = parseInt(page as string);
+      const limitNum = parseInt(limit as string);
+      const skip = (pageNum - 1) * limitNum;
+      
+      const sortOrder = order === 'asc' ? 1 : -1;
+      const sortField = sort === 'rating' ? 'rating' : sort === 'helpful' ? 'helpful' : 'createdAt';
+      
+      const reviews = await Review.find({ productId })
+        .sort({ [sortField]: sortOrder })
+        .skip(skip)
+        .limit(limitNum)
+        .lean();
+      
+      const total = await Review.countDocuments({ productId });
+      
+      // Calculate rating distribution
+      const ratingDistribution = await Review.aggregate([
+        { $match: { productId: productId as any } },
+        { $group: { _id: '$rating', count: { $sum: 1 } } },
+        { $sort: { _id: -1 } }
+      ]);
+      
+      const distribution = {
+        5: 0, 4: 0, 3: 0, 2: 0, 1: 0
+      };
+      ratingDistribution.forEach((item: any) => {
+        distribution[item._id as keyof typeof distribution] = item.count;
+      });
+      
+      res.json({
+        reviews,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          pages: Math.ceil(total / limitNum)
+        },
+        ratingDistribution: distribution
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/reviews", authenticateToken, async (req, res) => {
+    try {
+      const { productId, rating, title, comment } = req.body;
+      const customerId = req.user.userId;
+      
+      // Verify this is a customer token (not admin)
+      if (req.user.type !== 'customer') {
+        return res.status(403).json({ error: 'Only registered customers can post reviews' });
+      }
+      
+      const customer = await Customer.findById(customerId);
+      if (!customer) {
+        return res.status(403).json({ error: 'Customer account not found' });
+      }
+      
+      if (!productId || !rating || !title || !comment) {
+        return res.status(400).json({ error: 'All fields are required' });
+      }
+      
+      if (rating < 1 || rating > 5) {
+        return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+      }
+      
+      // Check if product exists
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ error: 'Product not found' });
+      }
+      
+      // Check if customer already reviewed this product
+      const existingReview = await Review.findOne({ productId, customerId });
+      if (existingReview) {
+        return res.status(400).json({ error: 'You have already reviewed this product' });
+      }
+      
+      // Check if customer purchased this product (using correct field: orderStatus)
+      const hasPurchased = await Order.findOne({
+        userId: customerId,
+        'items.productId': productId,
+        orderStatus: { $in: ['delivered'] }
+      });
+      
+      const review = new Review({
+        productId,
+        customerId,
+        customerName: customer.name || 'Anonymous',
+        rating,
+        title,
+        comment,
+        verifiedPurchase: !!hasPurchased
+      });
+      
+      await review.save();
+      
+      res.status(201).json(review);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.put("/api/reviews/:reviewId/helpful", authenticateToken, async (req, res) => {
+    try {
+      const { reviewId } = req.params;
+      const customerId = req.user.userId;
+      
+      // Verify this is a customer token (not admin)
+      if (req.user.type !== 'customer') {
+        return res.status(403).json({ error: 'Only registered customers can vote' });
+      }
+      
+      const customer = await Customer.findById(customerId);
+      if (!customer) {
+        return res.status(403).json({ error: 'Customer account not found' });
+      }
+      
+      const review = await Review.findById(reviewId);
+      if (!review) {
+        return res.status(404).json({ error: 'Review not found' });
+      }
+      
+      // Check if customer already voted (convert ObjectIds to strings for comparison)
+      const hasVoted = review.helpfulVotes && review.helpfulVotes.some(
+        (voterId: any) => voterId.toString() === customerId.toString()
+      );
+      if (hasVoted) {
+        return res.status(400).json({ error: 'You have already marked this review as helpful' });
+      }
+      
+      // Add customer to helpful votes and increment counter
+      review.helpfulVotes = review.helpfulVotes || [];
+      review.helpfulVotes.push(customerId);
+      review.helpful = review.helpfulVotes.length;
+      await review.save();
+      
+      res.json(review);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
 
   // User Auth Routes
   app.post("/api/auth/register", async (req, res) => {

@@ -335,6 +335,66 @@ orderSchema.post('deleteMany', async function() {
   }
 });
 
+// Review Schema
+const reviewSchema = new Schema({
+  productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+  customerId: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
+  customerName: { type: String, required: true },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  title: { type: String, required: true },
+  comment: { type: String, required: true },
+  verifiedPurchase: { type: Boolean, default: false },
+  helpful: { type: Number, default: 0 },
+  helpfulVotes: [{ type: Schema.Types.ObjectId, ref: 'Customer' }],
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+// Index for faster queries
+reviewSchema.index({ productId: 1, createdAt: -1 });
+reviewSchema.index({ customerId: 1 });
+
+// Function to update product rating and review count
+async function updateProductRating(productId: any) {
+  const Review = mongoose.models.Review || mongoose.model('Review', reviewSchema);
+  const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
+  
+  const reviews = await Review.find({ productId });
+  const reviewCount = reviews.length;
+  const rating = reviewCount > 0 
+    ? reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviewCount 
+    : 0;
+  
+  await Product.findByIdAndUpdate(productId, {
+    rating: Math.round(rating * 10) / 10, // Round to 1 decimal place
+    reviewCount,
+  });
+}
+
+// Review hooks to update product rating
+reviewSchema.post('save', async function(doc) {
+  await updateProductRating(doc.productId);
+});
+
+reviewSchema.post('findOneAndUpdate', async function(doc) {
+  if (doc?.productId) {
+    await updateProductRating(doc.productId);
+  }
+});
+
+reviewSchema.post('findOneAndDelete', async function(doc) {
+  if (doc?.productId) {
+    await updateProductRating(doc.productId);
+  }
+});
+
+reviewSchema.post('deleteMany', async function() {
+  const query = this.getFilter();
+  if (query.productId) {
+    await updateProductRating(query.productId);
+  }
+});
+
 // Export models
 export const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
 export const User = mongoose.models.User || mongoose.model('User', userSchema);
@@ -345,3 +405,4 @@ export const Wishlist = mongoose.models.Wishlist || mongoose.model('Wishlist', w
 export const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
 export const ContactSubmission = mongoose.models.ContactSubmission || mongoose.model('ContactSubmission', contactSubmissionSchema);
 export const OTP = mongoose.models.OTP || mongoose.model('OTP', otpSchema);
+export const Review = mongoose.models.Review || mongoose.model('Review', reviewSchema);

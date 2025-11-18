@@ -13,6 +13,7 @@ import { Star, Heart, ShoppingBag, Truck, Shield, RotateCcw, Sparkles } from "lu
 import { useToast } from "@/hooks/use-toast";
 import { localStorageService } from "@/lib/localStorage";
 import ProductCard from "@/components/ProductCard";
+import ReviewSection from "@/components/ReviewSection";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthUI } from "@/contexts/AuthUIContext";
 
@@ -660,6 +661,15 @@ export default function ProductDetail() {
             </motion.div>
           </motion.div>
         )}
+
+        {/* Customer Reviews Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <ReviewSection productId={baseProductId} />
+        </motion.div>
       </div>
 
       <Footer />
