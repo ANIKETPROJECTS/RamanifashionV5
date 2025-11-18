@@ -12,6 +12,7 @@ import XLSX from "xlsx";
 import { upload } from "./upload-config";
 import { sendWhatsAppOTP, generateOTP } from "./whatsapp-service";
 import { phonePeService } from "./phonepe-service";
+import { shiprocketService } from "./shiprocket.service";
 
 const JWT_SECRET = process.env.SESSION_SECRET || "ramani-fashion-secret-key";
 const ADMIN_JWT_SECRET = process.env.ADMIN_SESSION_SECRET || "ramani-admin-secret-key-2024";
@@ -1942,7 +1943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/orders/:id/approve", authenticateAdmin, async (req, res) => {
     try {
-      const order = await Order.findById(req.params.id);
+      const order = await Order.findById(req.params.id).populate('userId', 'name email phone');
       
       if (!order) {
         return res.status(404).json({ error: 'Order not found' });
@@ -1952,10 +1953,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Order already approved' });
       }
 
+      if (order.paymentStatus !== 'paid') {
+        return res.status(400).json({ error: 'Payment must be completed before approving order' });
+      }
+
+      const nameParts = order.shippingAddress.fullName.split(' ');
+      const firstName = nameParts[0] || 'Customer';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const orderItems = order.items.map((item: any, index: number) => ({
+        name: item.name,
+        sku: `SKU-${item.productId || index}`,
+        units: item.quantity,
+        selling_price: item.price,
+        discount: 0,
+        tax: 0,
+        hsn: 0
+      }));
+
+      const totalWeight = order.items.reduce((sum: number, item: any) => sum + (item.quantity * 0.5), 0);
+
+      const shiprocketOrderData = {
+        order_id: order.orderNumber,
+        order_date: new Date().toISOString().split('T')[0],
+        pickup_location: "Primary",
+        billing_customer_name: firstName,
+        billing_last_name: lastName,
+        billing_address: order.shippingAddress.address,
+        billing_city: order.shippingAddress.city,
+        billing_pincode: order.shippingAddress.pincode,
+        billing_state: order.shippingAddress.state,
+        billing_country: "India",
+        billing_email: (order.userId as any).email || "customer@ramanifashion.com",
+        billing_phone: order.shippingAddress.phone,
+        shipping_is_billing: true,
+        order_items: orderItems,
+        payment_method: order.paymentMethod === 'cod' ? 'COD' : 'Prepaid',
+        sub_total: order.subtotal,
+        length: 30,
+        breadth: 25,
+        height: 10,
+        weight: totalWeight
+      };
+
+      const shiprocketResponse = await shiprocketService.createOrder(shiprocketOrderData);
+
       order.approved = true;
       order.approvedBy = req.admin.username;
       order.approvedAt = new Date();
-      order.orderStatus = 'approved';
+      order.orderStatus = 'processing';
+      order.shiprocketOrderId = shiprocketResponse.order_id;
+      order.shiprocketShipmentId = shiprocketResponse.shipment_id;
+      order.updatedAt = new Date();
+      
+      await order.save();
+
+      if (shiprocketResponse.shipment_id) {
+        try {
+          const awbResponse = await shiprocketService.assignAWB(shiprocketResponse.shipment_id);
+          
+          if (awbResponse.response?.data?.awb_code) {
+            order.shiprocketAwbCode = awbResponse.response.data.awb_code;
+            order.shiprocketCourierId = awbResponse.response.data.courier_company_id;
+            order.shiprocketCourierName = awbResponse.response.data.courier_name;
+            await order.save();
+
+            try {
+              await shiprocketService.schedulePickup(shiprocketResponse.shipment_id);
+              console.log(`✅ Pickup scheduled for order ${order.orderNumber}`);
+            } catch (pickupError: any) {
+              console.error('Pickup scheduling failed (non-critical):', pickupError.message);
+            }
+          }
+        } catch (awbError: any) {
+          console.error('AWB assignment failed (non-critical):', awbError.message);
+        }
+      }
+
+      console.log(`✅ Order ${order.orderNumber} approved and sent to Shiprocket`);
+
+      const populatedOrder = await Order.findById(order._id)
+        .populate('userId', 'name email phone')
+        .lean();
+
+      res.json(populatedOrder);
+    } catch (error: any) {
+      console.error('Order approval failed:', error.message);
+      res.status(500).json({ error: error.message || 'Failed to approve order and create shipment' });
+    }
+  });
+
+  app.post("/api/admin/orders/:id/reject", authenticateAdmin, async (req, res) => {
+    try {
+      const { reason } = req.body;
+      const order = await Order.findById(req.params.id);
+      
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      if (order.approved) {
+        return res.status(400).json({ error: 'Cannot reject an already approved order' });
+      }
+
+      if (order.orderStatus === 'cancelled') {
+        return res.status(400).json({ error: 'Order is already cancelled' });
+      }
+
+      order.orderStatus = 'cancelled';
+      order.rejectedBy = req.admin.username;
+      order.rejectedAt = new Date();
+      order.rejectionReason = reason || 'No reason provided';
       order.updatedAt = new Date();
       
       await order.save();

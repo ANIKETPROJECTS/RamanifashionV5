@@ -25,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Eye, LayoutGrid, List, Package } from "lucide-react";
+import { Search, Eye, LayoutGrid, List, Package, Truck, CheckCircle, XCircle } from "lucide-react";
 
 interface Order {
   _id: string;
@@ -69,6 +69,16 @@ interface Order {
   phonePeOrderId?: string;
   phonePePaymentState?: string;
   phonePePaymentDetails?: any;
+  shiprocketOrderId?: number;
+  shiprocketShipmentId?: number;
+  shiprocketAwbCode?: string;
+  shiprocketCourierId?: number;
+  shiprocketCourierName?: string;
+  shiprocketLabelUrl?: string;
+  shiprocketTrackingUrl?: string;
+  rejectedBy?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -109,6 +119,10 @@ export default function OrderManagement() {
   const [newPaymentStatus, setNewPaymentStatus] = useState("");
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
 
+  // Reject dialog
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+
   // Build query params
   const queryParams = useMemo(() => {
     const params = new URLSearchParams();
@@ -138,9 +152,28 @@ export default function OrderManagement() {
       apiRequest(`/api/admin/orders/${orderId}/approve`, "POST"),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
-      toast({ title: "Order approved successfully!" });
+      toast({ 
+        title: "Order approved successfully!", 
+        description: "Order has been sent to Shiprocket for processing." 
+      });
       setDetailDialogOpen(false);
       setSelectedOrder(null);
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const rejectOrderMutation = useMutation({
+    mutationFn: ({ orderId, reason }: { orderId: string; reason: string }) => 
+      apiRequest(`/api/admin/orders/${orderId}/reject`, "POST", { reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+      toast({ title: "Order rejected successfully!" });
+      setDetailDialogOpen(false);
+      setSelectedOrder(null);
+      setRejectDialogOpen(false);
+      setRejectionReason("");
     },
     onError: (error: any) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -821,23 +854,80 @@ export default function OrderManagement() {
                   </div>
                 )}
 
+                {selectedOrder.orderStatus === 'cancelled' && selectedOrder.rejectedBy && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground mb-2">Rejection Information</div>
+                    <div className="bg-red-50 dark:bg-red-950 p-3 rounded-md space-y-1 text-sm">
+                      <div><strong>Rejected By:</strong> {selectedOrder.rejectedBy}</div>
+                      {selectedOrder.rejectedAt && (
+                        <div><strong>Rejected At:</strong> {format(new Date(selectedOrder.rejectedAt), 'dd MMM yyyy, HH:mm')}</div>
+                      )}
+                      {selectedOrder.rejectionReason && (
+                        <div><strong>Reason:</strong> {selectedOrder.rejectionReason}</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {selectedOrder.shiprocketOrderId && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                      <Truck className="h-4 w-4" />
+                      Shiprocket Shipping Information
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-md space-y-1 text-sm">
+                      <div><strong>Shiprocket Order ID:</strong> {selectedOrder.shiprocketOrderId}</div>
+                      {selectedOrder.shiprocketShipmentId && (
+                        <div><strong>Shipment ID:</strong> {selectedOrder.shiprocketShipmentId}</div>
+                      )}
+                      {selectedOrder.shiprocketAwbCode && (
+                        <div><strong>AWB Code:</strong> {selectedOrder.shiprocketAwbCode}</div>
+                      )}
+                      {selectedOrder.shiprocketCourierName && (
+                        <div><strong>Courier:</strong> {selectedOrder.shiprocketCourierName}</div>
+                      )}
+                      {selectedOrder.shiprocketLabelUrl && (
+                        <div>
+                          <a 
+                            href={selectedOrder.shiprocketLabelUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            Download Shipping Label
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {!selectedOrder.approved && selectedOrder.orderStatus === 'pending' && (
                   <div className="flex gap-2 pt-4 border-t">
                     <Button
                       onClick={() => approveOrderMutation.mutate(selectedOrder._id)}
-                      disabled={approveOrderMutation.isPending}
+                      disabled={approveOrderMutation.isPending || selectedOrder.paymentStatus !== 'paid'}
                       className="flex-1"
                       data-testid="button-approve-order"
                     >
-                      {approveOrderMutation.isPending ? 'Approving...' : 'Approve Order'}
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      {approveOrderMutation.isPending ? 'Approving...' : 'Approve & Send to Shiprocket'}
                     </Button>
                     <Button
-                      variant="outline"
-                      onClick={() => setDetailDialogOpen(false)}
-                      data-testid="button-close-details"
+                      variant="destructive"
+                      onClick={() => setRejectDialogOpen(true)}
+                      disabled={rejectOrderMutation.isPending}
+                      className="flex-1"
+                      data-testid="button-reject-order"
                     >
-                      Close
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Reject Order
                     </Button>
+                  </div>
+                )}
+                {selectedOrder.paymentStatus !== 'paid' && selectedOrder.orderStatus === 'pending' && !selectedOrder.approved && (
+                  <div className="text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950 p-3 rounded-md">
+                    ⚠️ Payment must be completed before approving the order
                   </div>
                 )}
               </div>
@@ -890,6 +980,52 @@ export default function OrderManagement() {
                 </Button>
                 <Button onClick={submitStatusUpdate} disabled={updateStatusMutation.isPending}>
                   {updateStatusMutation.isPending ? 'Updating...' : 'Update Status'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reject Order Dialog */}
+        <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reject Order - {selectedOrder?.orderNumber}</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="rejectionReason">Reason for Rejection</Label>
+                <Input
+                  id="rejectionReason"
+                  placeholder="Enter reason for rejecting this order..."
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  data-testid="input-rejection-reason"
+                />
+              </div>
+
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => {
+                  setRejectDialogOpen(false);
+                  setRejectionReason("");
+                }}>
+                  Cancel
+                </Button>
+                <Button 
+                  variant="destructive"
+                  onClick={() => {
+                    if (selectedOrder) {
+                      rejectOrderMutation.mutate({
+                        orderId: selectedOrder._id,
+                        reason: rejectionReason
+                      });
+                    }
+                  }}
+                  disabled={rejectOrderMutation.isPending || !rejectionReason.trim()}
+                  data-testid="button-confirm-reject"
+                >
+                  {rejectOrderMutation.isPending ? 'Rejecting...' : 'Reject Order'}
                 </Button>
               </div>
             </div>
