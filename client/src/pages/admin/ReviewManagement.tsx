@@ -129,11 +129,13 @@ export default function ReviewManagement() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (reviewId: string) => {
-      return apiRequest(`/api/admin/reviews/${reviewId}`, "DELETE");
+    mutationFn: async (review: Review) => {
+      return apiRequest(`/api/admin/reviews/${review._id}`, "DELETE");
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/reviews"] });
+    onSuccess: (data, review) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reviews"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews", review.productId._id], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["/api/products", review.productId._id] });
       toast({
         title: "Review deleted",
         description: "The review has been successfully deleted.",
@@ -157,7 +159,7 @@ export default function ReviewManagement() {
 
   const handleDeleteConfirm = () => {
     if (reviewToDelete) {
-      deleteMutation.mutate(reviewToDelete._id);
+      deleteMutation.mutate(reviewToDelete);
     }
   };
 

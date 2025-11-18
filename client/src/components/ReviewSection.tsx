@@ -77,6 +77,7 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
       setRating(5);
       queryClient.invalidateQueries({ queryKey: ["/api/reviews", productId] });
       queryClient.invalidateQueries({ queryKey: ["/api/products", productId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reviews"] });
     },
     onError: (error: any) => {
       toast({
@@ -93,6 +94,7 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reviews", productId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reviews"] });
     },
   });
 
