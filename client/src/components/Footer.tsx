@@ -109,6 +109,7 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* 
           <div>
             <h4 className="font-semibold text-lg mb-4 text-primary">Customer Service</h4>
             <ul className="space-y-2 text-sm">
@@ -119,6 +120,7 @@ export default function Footer() {
               <li><Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-policy">Policy Page</Link></li>
             </ul>
           </div>
+          */}
 
           <div>
             <h4 className="font-semibold text-lg mb-4 text-primary">Newsletter</h4>
