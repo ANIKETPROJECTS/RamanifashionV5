@@ -370,7 +370,8 @@ export default function Sale() {
                 </CollapsibleContent>
               </Collapsible>
 
-              <Collapsible open={openSections.includes("fabric")}>
+              {/* HIDDEN - Fabric Type Filter (Uncomment to re-enable) */}
+              {/* <Collapsible open={openSections.includes("fabric")}>
                 <CollapsibleTrigger 
                   className="flex items-center justify-between w-full py-2 hover-elevate px-2 rounded-md"
                   onClick={() => toggleSection("fabric")}
@@ -392,9 +393,10 @@ export default function Sale() {
                     </div>
                   ))}
                 </CollapsibleContent>
-              </Collapsible>
+              </Collapsible> */}
 
-              <Collapsible open={openSections.includes("occasion")}>
+              {/* HIDDEN - Occasion Filter (Uncomment to re-enable) */}
+              {/* <Collapsible open={openSections.includes("occasion")}>
                 <CollapsibleTrigger 
                   className="flex items-center justify-between w-full py-2 hover-elevate px-2 rounded-md"
                   onClick={() => toggleSection("occasion")}
@@ -416,9 +418,10 @@ export default function Sale() {
                     </div>
                   ))}
                 </CollapsibleContent>
-              </Collapsible>
+              </Collapsible> */}
 
-              <Collapsible open={openSections.includes("color")}>
+              {/* HIDDEN - Color Filter (Uncomment to re-enable) */}
+              {/* <Collapsible open={openSections.includes("color")}>
                 <CollapsibleTrigger 
                   className="flex items-center justify-between w-full py-2 hover-elevate px-2 rounded-md"
                   onClick={() => toggleSection("color")}
@@ -442,7 +445,7 @@ export default function Sale() {
                     ))}
                   </div>
                 </CollapsibleContent>
-              </Collapsible>
+              </Collapsible> */}
             </div>
           </aside>
 
@@ -668,7 +671,8 @@ export default function Sale() {
                   </CollapsibleContent>
                 </Collapsible>
 
-                <Collapsible open={openSections.includes("fabric")}>
+                {/* HIDDEN - Fabric Type Filter (Uncomment to re-enable) */}
+                {/* <Collapsible open={openSections.includes("fabric")}>
                   <CollapsibleTrigger 
                     className="flex items-center justify-between w-full py-3 hover-elevate px-2 rounded-md"
                     onClick={() => toggleSection("fabric")}
@@ -690,9 +694,10 @@ export default function Sale() {
                       </div>
                     ))}
                   </CollapsibleContent>
-                </Collapsible>
+                </Collapsible> */}
 
-                <Collapsible open={openSections.includes("occasion")}>
+                {/* HIDDEN - Occasion Filter (Uncomment to re-enable) */}
+                {/* <Collapsible open={openSections.includes("occasion")}>
                   <CollapsibleTrigger 
                     className="flex items-center justify-between w-full py-3 hover-elevate px-2 rounded-md"
                     onClick={() => toggleSection("occasion")}
@@ -714,9 +719,10 @@ export default function Sale() {
                       </div>
                     ))}
                   </CollapsibleContent>
-                </Collapsible>
+                </Collapsible> */}
 
-                <Collapsible open={openSections.includes("color")}>
+                {/* HIDDEN - Color Filter (Uncomment to re-enable) */}
+                {/* <Collapsible open={openSections.includes("color")}>
                   <CollapsibleTrigger 
                     className="flex items-center justify-between w-full py-3 hover-elevate px-2 rounded-md"
                     onClick={() => toggleSection("color")}
@@ -739,7 +745,7 @@ export default function Sale() {
                       ))}
                     </div>
                   </CollapsibleContent>
-                </Collapsible>
+                </Collapsible> */}
               </div>
             </SheetContent>
           </Sheet>
