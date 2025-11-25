@@ -3,17 +3,28 @@ import { SiWhatsapp } from "react-icons/si";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import logoImage from "@assets/PNG__B_ LOGO_1762442171742.png";
 import instagramIcon from "@assets/instagram_1762445939344.png";
 import facebookIcon from "@assets/communication_1762445935759.png";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
+  const [, setLocation] = useLocation();
 
   const handleSubscribe = () => {
     console.log('Subscribe:', email);
     setEmail("");
+  };
+
+  const handleContactClick = () => {
+    setLocation("/");
+    setTimeout(() => {
+      const contactSection = document.getElementById("contact");
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100);
   };
 
   return (
@@ -85,7 +96,7 @@ export default function Footer() {
               <li><Link href="/trending-collection" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-trending-footer">Trending Collection</Link></li>
               <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-about-footer">About Us</Link></li>
               <li><Link href="/sale" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-sale-footer">Sale</Link></li>
-              <li><Link href="/#contact" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-contact-footer">Contact</Link></li>
+              <li><button onClick={handleContactClick} className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-contact-footer">Contact</button></li>
               <li><Link href="/admin/login" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-admin-footer">Admin Panel</Link></li>
             </ul>
           </div>
