@@ -1001,15 +1001,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const merchantOrderId = order.orderNumber || `RM${Date.now()}`;
       const amountInPaisa = Math.round(amount * 100);
       
-      const baseUrl = process.env.REPLIT_DOMAINS 
-        ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
-        : `http://localhost:${process.env.PORT || 5000}`;
+      // Use HOST_URL for production (custom domain), fallback to Replit domains
+      const baseUrl = process.env.HOST_URL 
+        || (process.env.REPLIT_DOMAINS 
+          ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
+          : `http://localhost:${process.env.PORT || 5000}`);
       const redirectUrl = `${baseUrl}/payment-callback`;
+      const callbackUrl = `${baseUrl}/api/payment/phonepe/webhook`;
 
       const paymentResponse = await phonePeService.initiatePayment({
         merchantOrderId,
         amount: amountInPaisa,
         redirectUrl,
+        callbackUrl,
         udf1: orderId,
         udf2: (req as any).user.userId,
       });

@@ -15,6 +15,10 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
+localPort = 37137
+externalPort = 5000
+
+[[ports]]
 localPort = 43313
 externalPort = 8000
 
@@ -87,3 +91,4 @@ PHONEPE_SALT_INDEX = "5b5b1002-099f-4ae7-abda-a2507503a219"
 PHONEPE_SALT_KEY = "1"
 SHIPROCKET_API_EMAIL = "raneaniket23@gmail.com"
 NODE_ENV = "production"
+HOST_URL = "https://ramanifashion.in"
