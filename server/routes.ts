@@ -1105,6 +1105,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PhonePe redirect callback after payment
+  app.post("/payment-callback", async (req, res) => {
+    try {
+      // PhonePe sends the response in the response field (base64 encoded)
+      const { response: base64Response } = req.body;
+      
+      let merchantOrderId = null;
+      let paymentStatus = 'PENDING';
+
+      if (base64Response) {
+        try {
+          const decodedResponse = Buffer.from(base64Response, 'base64').toString('utf-8');
+          const paymentData = JSON.parse(decodedResponse);
+          merchantOrderId = paymentData.merchantOrderId || paymentData.merchantTransactionId;
+          paymentStatus = paymentData.state || 'PENDING';
+        } catch (parseError) {
+          console.error('Error parsing PhonePe response:', parseError);
+        }
+      }
+
+      // Find the frontend base URL (use HOST_URL)
+      const frontendUrl = process.env.HOST_URL || 'https://ramanifashion.in';
+
+      // Redirect based on payment status
+      if (paymentStatus === 'COMPLETED' || paymentStatus === 'SUCCESS') {
+        return res.redirect(`${frontendUrl}/checkout?status=success&merchantOrderId=${merchantOrderId}`);
+      } else if (paymentStatus === 'FAILED') {
+        return res.redirect(`${frontendUrl}/checkout?status=failed&merchantOrderId=${merchantOrderId}`);
+      } else {
+        return res.redirect(`${frontendUrl}/checkout?status=pending&merchantOrderId=${merchantOrderId}`);
+      }
+    } catch (error: any) {
+      console.error('Payment callback error:', error);
+      const frontendUrl = process.env.HOST_URL || 'https://ramanifashion.in';
+      res.redirect(`${frontendUrl}/checkout?status=error`);
+    }
+  });
 
   app.post("/api/payment/phonepe/webhook", async (req, res) => {
     try {
