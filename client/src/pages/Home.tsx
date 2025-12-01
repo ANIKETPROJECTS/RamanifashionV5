@@ -44,7 +44,7 @@ import casualImage from "@assets/generated_images/Casual_linen_saree_030a208d.pn
 import banarasiImage from "@assets/generated_images/Banarasi_saree_detail_604e6fdd.png";
 import festiveImage from "@assets/generated_images/Festive_collection_banner_7a822710.png";
 import customerImage from "@assets/generated_images/Customer_testimonial_portrait_6ffe6534.png";
-import ramaniBanner from "@/assets/ramani-banner.png";
+import ramaniBannerStatic from "@/assets/ramani-banner.png";
 import paithaniImage from "@/assets/paithani.png";
 import khunIrkalImage from "@/assets/khun-irkal.png";
 import ajrakhModalImage from "@/assets/ajrakh-modal.png";
