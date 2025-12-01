@@ -76,7 +76,11 @@ export default function Home() {
   useEffect(() => {
     fetch("/media/ramani-banner.png")
       .then((res) => {
-        if (res.ok) setRamaniBanner("/media/ramani-banner.png");
+        if (res.ok) {
+          setRamaniBanner("/media/ramani-banner.png");
+        } else {
+          setRamaniBanner(ramaniBannerStatic);
+        }
       })
       .catch(() => setRamaniBanner(ramaniBannerStatic));
   }, []);

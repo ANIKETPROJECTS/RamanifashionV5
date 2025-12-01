@@ -9,11 +9,15 @@ export default function HeroCarousel() {
 
   useEffect(() => {
     // Try to load the uploaded hero banner, fallback to static import
-    const heroPath = "/media/hero-banner.png";
-    const img = new Image();
-    img.onload = () => setHeroImage(heroPath);
-    img.onerror = () => setHeroImage(bannerImage);
-    img.src = heroPath;
+    fetch("/media/hero-banner.png")
+      .then((res) => {
+        if (res.ok) {
+          setHeroImage("/media/hero-banner.png");
+        } else {
+          setHeroImage(bannerImage);
+        }
+      })
+      .catch(() => setHeroImage(bannerImage));
   }, []);
 
   const slides = [

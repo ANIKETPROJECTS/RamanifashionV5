@@ -25,6 +25,9 @@ app.use("/attached_assets", express.static(path.resolve("./attached_assets")));
 // Serve static files from uploads directory
 app.use("/uploads", express.static(path.resolve("./uploads")));
 
+// Serve static files from media directory (admin uploads)
+app.use("/media", express.static(path.resolve("./public/media")));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
