@@ -30,6 +30,7 @@ import OrderManagement from "@/pages/admin/OrderManagement";
 import CustomerManagement from "@/pages/admin/CustomerManagement";
 import ReviewManagement from "@/pages/admin/ReviewManagement";
 import Analytics from "@/pages/admin/Analytics";
+import MediaManagement from "@/pages/admin/MediaManagement";
 import Settings from "@/pages/admin/Settings";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
@@ -72,6 +73,7 @@ function Router() {
       <Route path="/admin/customers" component={CustomerManagement} />
       <Route path="/admin/reviews" component={ReviewManagement} />
       <Route path="/admin/analytics" component={Analytics} />
+      <Route path="/admin/media" component={MediaManagement} />
       <Route path="/admin/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
