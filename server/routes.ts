@@ -122,6 +122,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Special handling for discount sorting - use aggregation
       if (sort === 'discount') {
+        // Parse color filter if present for pipeline
+        let selectedColors: string[] = [];
+        if (color) {
+          selectedColors = (color as string).split(',').filter(Boolean);
+        }
+
         const pipeline: any[] = [
           { $match: query },
           {
@@ -146,6 +152,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             }
           },
+          // Filter colorVariants array if color filter is applied
+          ...(selectedColors.length > 0 ? [{
+            $addFields: {
+              colorVariants: {
+                $filter: {
+                  input: '$colorVariants',
+                  as: 'variant',
+                  cond: { $in: ['$$variant.color', selectedColors] }
+                }
+              }
+            }
+          }] : []),
           { $sort: { discountPercent: sortOrder } },
           { $skip: skip },
           { $limit: limitNum }
@@ -154,21 +172,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const products = await Product.aggregate(pipeline);
         const total = await Product.countDocuments(query);
 
-        // Parse color filter if present
-        let selectedColors: string[] = [];
-        if (color) {
-          selectedColors = (color as string).split(',').filter(Boolean);
-        }
-
         // Flatten products with color variants into separate cards
         const flattenedProducts = products.flatMap((product: any) => {
           if (product.colorVariants && product.colorVariants.length > 0) {
-            // Filter variants by selected color(s) if color filter is applied
-            const variantsToShow = selectedColors.length > 0 
-              ? product.colorVariants.filter((variant: any) => selectedColors.includes(variant.color))
-              : product.colorVariants;
-            
-            return variantsToShow.map((variant: any, index: number) => ({
+            return product.colorVariants.map((variant: any, index: number) => ({
               ...product,
               _id: `${product._id}_variant_${index}`,
               baseProductId: product._id,
@@ -196,29 +203,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const sortObj: any = {};
         sortObj[sort as string] = sortOrder;
 
-        const products = await Product.find(query)
-          .sort(sortObj)
-          .skip(skip)
-          .limit(limitNum)
-          .lean();
-
-        const total = await Product.countDocuments(query);
-
-        // Parse color filter if present
+        // Parse color filter if present for aggregation
         let selectedColors: string[] = [];
         if (color) {
           selectedColors = (color as string).split(',').filter(Boolean);
         }
 
+        // Build aggregation pipeline with color variant filtering
+        const aggregationPipeline: any[] = [
+          { $match: query },
+          // Filter colorVariants array if color filter is applied
+          ...(selectedColors.length > 0 ? [{
+            $addFields: {
+              colorVariants: {
+                $filter: {
+                  input: '$colorVariants',
+                  as: 'variant',
+                  cond: { $in: ['$$variant.color', selectedColors] }
+                }
+              }
+            }
+          }] : []),
+          { $sort: sortObj },
+          { $skip: skip },
+          { $limit: limitNum }
+        ];
+
+        const products = await Product.aggregate(aggregationPipeline).exec();
+
+        const total = await Product.countDocuments(query);
+
         // Flatten products with color variants into separate cards
         const flattenedProducts = products.flatMap((product: any) => {
           if (product.colorVariants && product.colorVariants.length > 0) {
-            // Filter variants by selected color(s) if color filter is applied
-            const variantsToShow = selectedColors.length > 0 
-              ? product.colorVariants.filter((variant: any) => selectedColors.includes(variant.color))
-              : product.colorVariants;
-            
-            return variantsToShow.map((variant: any, index: number) => ({
+            return product.colorVariants.map((variant: any, index: number) => ({
               ...product,
               _id: `${product._id}_variant_${index}`,
               baseProductId: product._id,
