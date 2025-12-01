@@ -70,6 +70,7 @@ export default function Home() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [ramaniBanner, setRamaniBanner] = useState<string>(ramaniBannerStatic);
+  const [videoUrl, setVideoUrl] = useState<string>("https://www.youtube.com/embed/dlCJY6x-xtI?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=dlCJY6x-xtI");
   const { toast } = useToast();
 
   // Load uploaded ramani banner with fallback
@@ -78,6 +79,19 @@ export default function Home() {
     img.onload = () => setRamaniBanner("/media/ramani-banner.png");
     img.onerror = () => setRamaniBanner(ramaniBannerStatic);
     img.src = "/media/ramani-banner.png";
+  }, []);
+
+  // Load uploaded promotional video with fallback to YouTube
+  useEffect(() => {
+    fetch("/media/promotional-video.mp4", { method: 'HEAD' })
+      .then((res) => {
+        if (res.ok) {
+          setVideoUrl("/media/promotional-video.mp4");
+        }
+      })
+      .catch(() => {
+        // Keep default YouTube URL
+      });
   }, []);
 
   const { data: newArrivalsData } = useQuery({
@@ -476,16 +490,31 @@ export default function Home() {
         >
           <div className="w-full overflow-hidden rounded-lg bg-black">
             <div className="relative w-full" style={{ paddingBottom: '42%' }}>
-              <iframe
-                className="absolute top-0 left-0 w-full h-full"
-                src="https://www.youtube.com/embed/dlCJY6x-xtI?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=dlCJY6x-xtI"
-                title="Ramani Fashion Collection"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-                data-testid="video-banner"
-              ></iframe>
+              {videoUrl.startsWith('http') ? (
+                <iframe
+                  className="absolute top-0 left-0 w-full h-full"
+                  src={videoUrl}
+                  title="Ramani Fashion Collection"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                  data-testid="video-banner"
+                ></iframe>
+              ) : (
+                <video
+                  className="absolute top-0 left-0 w-full h-full"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  controls
+                  data-testid="video-banner"
+                >
+                  <source src={videoUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              )}
             </div>
           </div>
         </motion.section>
