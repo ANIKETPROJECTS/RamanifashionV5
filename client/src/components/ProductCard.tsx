@@ -118,8 +118,9 @@ export default function ProductCard({
     },
   });
 
-  // Use the actual product ID (including variant info) for cart/wishlist operations
-  const cartProductId = id;
+  // Use the base product ID (without variant suffix) for cart/wishlist operations
+  // The id may contain _variant_X suffix which is not a valid MongoDB ObjectId
+  const cartProductId = baseProductId || id.split('_variant_')[0];
   
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
