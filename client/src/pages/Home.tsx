@@ -6,7 +6,7 @@ import TestimonialCard from "@/components/TestimonialCard";
 import Footer from "@/components/Footer";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
@@ -69,7 +69,17 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [ramaniBanner, setRamaniBanner] = useState(ramaniBannerStatic);
   const { toast } = useToast();
+
+  // Load uploaded ramani banner with fallback
+  useEffect(() => {
+    const ramaniBannerPath = "/media/ramani-banner.png";
+    const img = new Image();
+    img.onload = () => setRamaniBanner(ramaniBannerPath);
+    img.onerror = () => setRamaniBanner(ramaniBannerStatic);
+    img.src = ramaniBannerPath;
+  }, []);
 
   const { data: newArrivalsData } = useQuery({
     queryKey: ["/api/products?isNew=true&limit=6"],
