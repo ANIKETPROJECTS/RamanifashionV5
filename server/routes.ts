@@ -154,10 +154,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const products = await Product.aggregate(pipeline);
         const total = await Product.countDocuments(query);
 
+        // Parse color filter if present
+        let selectedColors: string[] = [];
+        if (color) {
+          selectedColors = (color as string).split(',').filter(Boolean);
+        }
+
         // Flatten products with color variants into separate cards
         const flattenedProducts = products.flatMap((product: any) => {
           if (product.colorVariants && product.colorVariants.length > 0) {
-            return product.colorVariants.map((variant: any, index: number) => ({
+            // Filter variants by selected color(s) if color filter is applied
+            const variantsToShow = selectedColors.length > 0 
+              ? product.colorVariants.filter((variant: any) => selectedColors.includes(variant.color))
+              : product.colorVariants;
+            
+            return variantsToShow.map((variant: any, index: number) => ({
               ...product,
               _id: `${product._id}_variant_${index}`,
               baseProductId: product._id,
@@ -193,10 +204,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const total = await Product.countDocuments(query);
 
+        // Parse color filter if present
+        let selectedColors: string[] = [];
+        if (color) {
+          selectedColors = (color as string).split(',').filter(Boolean);
+        }
+
         // Flatten products with color variants into separate cards
         const flattenedProducts = products.flatMap((product: any) => {
           if (product.colorVariants && product.colorVariants.length > 0) {
-            return product.colorVariants.map((variant: any, index: number) => ({
+            // Filter variants by selected color(s) if color filter is applied
+            const variantsToShow = selectedColors.length > 0 
+              ? product.colorVariants.filter((variant: any) => selectedColors.includes(variant.color))
+              : product.colorVariants;
+            
+            return variantsToShow.map((variant: any, index: number) => ({
               ...product,
               _id: `${product._id}_variant_${index}`,
               baseProductId: product._id,
