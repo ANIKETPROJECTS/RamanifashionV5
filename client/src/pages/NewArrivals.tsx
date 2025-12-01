@@ -340,6 +340,33 @@ export default function NewArrivals() {
                 </CollapsibleContent>
               </Collapsible>
 
+              <Collapsible open={openSections.includes("price")}>
+                <CollapsibleTrigger 
+                  className="flex items-center justify-between w-full py-2 hover-elevate px-2 rounded-md"
+                  onClick={() => toggleSection("price")}
+                >
+                  <span className="font-medium">Price Range</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("price") ? "rotate-180" : ""}`} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-4 space-y-4">
+                  <Slider
+                    value={priceRange}
+                    onValueChange={(val) => {
+                      setPriceRange(val);
+                      setPage(1);
+                    }}
+                    min={priceRangeData?.minPrice || 0}
+                    max={priceRangeData?.maxPrice || 10000}
+                    step={100}
+                    data-testid="slider-price-range"
+                  />
+                  <div className="flex items-center justify-between text-sm">
+                    <span data-testid="text-price-min">₹{priceRange[0]}</span>
+                    <span data-testid="text-price-max">₹{priceRange[1]}</span>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
               {productColors.length > 0 && (
                 <Collapsible open={openSections.includes("color")}>
                   <CollapsibleTrigger 
@@ -367,33 +394,6 @@ export default function NewArrivals() {
                   </CollapsibleContent>
                 </Collapsible>
               )}
-
-              <Collapsible open={openSections.includes("price")}>
-                <CollapsibleTrigger 
-                  className="flex items-center justify-between w-full py-2 hover-elevate px-2 rounded-md"
-                  onClick={() => toggleSection("price")}
-                >
-                  <span className="font-medium">Price Range</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${openSections.includes("price") ? "rotate-180" : ""}`} />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pt-4 space-y-4">
-                  <Slider
-                    value={priceRange}
-                    onValueChange={(val) => {
-                      setPriceRange(val);
-                      setPage(1);
-                    }}
-                    min={priceRangeData?.minPrice || 0}
-                    max={priceRangeData?.maxPrice || 10000}
-                    step={100}
-                    data-testid="slider-price-range"
-                  />
-                  <div className="flex items-center justify-between text-sm">
-                    <span data-testid="text-price-min">₹{priceRange[0]}</span>
-                    <span data-testid="text-price-max">₹{priceRange[1]}</span>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
 
               {/* HIDDEN - Fabric Type Filter (Uncomment to re-enable) */}
               {/* <Collapsible open={openSections.includes("fabric")}>
