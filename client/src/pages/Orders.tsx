@@ -37,6 +37,13 @@ export default function Orders() {
     return 'Online';
   };
 
+  const getPaymentMethodSummary = (method: string) => {
+    if (method.toLowerCase() === 'cod') {
+      return 'COD';
+    }
+    return 'UPI';
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -209,7 +216,7 @@ export default function Orders() {
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Payment Method</span>
-                          <span className="uppercase">{order.paymentMethod}</span>
+                          <span>{getPaymentMethodSummary(order.paymentMethod)}</span>
                         </div>
                       </div>
                     </div>
