@@ -21,17 +21,6 @@ export default function Orders() {
 
   const isUnauthorized = isError && error && String(error).includes("401:");
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      pending: "bg-yellow-100 text-yellow-800",
-      processing: "bg-blue-100 text-blue-800",
-      shipped: "bg-purple-100 text-purple-800",
-      delivered: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
-    };
-    return colors[status] || "bg-gray-100 text-gray-800";
-  };
-
   const getPaymentStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       pending: "bg-yellow-100 text-yellow-800",
@@ -127,11 +116,12 @@ export default function Orders() {
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Badge className={getStatusColor(order.orderStatus)} data-testid={`badge-order-status-${order._id}`}>
-                      {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
-                    </Badge>
                     <Badge className={getPaymentStatusColor(order.paymentStatus)} data-testid={`badge-payment-status-${order._id}`}>
-                      {order.paymentStatus === 'paid' ? 'Paid' : order.paymentStatus === 'pending' ? 'Payment Pending' : 'Payment Failed'}
+                      {order.paymentStatus === 'paid' 
+                        ? `Paid via ${order.paymentMethod === 'cod' ? 'COD' : order.paymentMethod === 'phonepe' ? 'PhonePe' : order.paymentMethod?.toUpperCase() || 'Online'}` 
+                        : order.paymentStatus === 'pending' 
+                          ? 'Payment Pending' 
+                          : 'Payment Failed'}
                     </Badge>
                   </div>
                 </div>
