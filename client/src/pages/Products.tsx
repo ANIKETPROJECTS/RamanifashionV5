@@ -314,7 +314,7 @@ export default function Products() {
 
         <div className="flex gap-6">
           <aside className={`w-64 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <div className="space-y-4 p-4 bg-card rounded-md sticky top-24" data-testid="sidebar-filters">
+            <div className="space-y-4 p-4 bg-background rounded-md sticky top-24" data-testid="sidebar-filters">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold">Filters</h3>
                 {activeFiltersCount > 0 && (
