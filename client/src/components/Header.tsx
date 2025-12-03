@@ -464,15 +464,6 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                           ))}
                         </div>
                       </ScrollArea>
-                      <div className="border-t px-4 py-3">
-                        <button
-                          onClick={handleSearchSubmit}
-                          className="w-full text-center text-sm text-primary hover:text-primary/80 font-medium"
-                          data-testid="button-view-all-results"
-                        >
-                          View all results for "{searchQuery}"
-                        </button>
-                      </div>
                     </>
                   ) : searchQuery.trim().length >= 2 ? (
                     <div className="py-8 px-4 text-center">
