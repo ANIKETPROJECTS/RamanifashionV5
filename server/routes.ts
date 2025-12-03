@@ -317,13 +317,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .limit(limitNum)
         .lean();
 
-      // Flatten products with color variants
+      // Flatten products with color variants - show ALL color variants in search
       const flattenedProducts = products.flatMap((product: any) => {
         if (product.colorVariants && product.colorVariants.length > 0) {
-          return product.colorVariants.slice(0, 1).map((variant: any, index: number) => ({
+          return product.colorVariants.map((variant: any, index: number) => ({
             _id: `${product._id}_variant_${index}`,
             baseProductId: product._id,
             name: product.name,
+            variantName: `${product.name} - ${variant.color}`,
             price: product.price,
             originalPrice: product.originalPrice,
             category: product.category,
@@ -336,6 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           _id: product._id,
           baseProductId: product._id,
           name: product.name,
+          variantName: product.name,
           price: product.price,
           originalPrice: product.originalPrice,
           category: product.category,

@@ -57,6 +57,7 @@ interface SearchProduct {
   _id: string;
   baseProductId: string;
   name: string;
+  variantName?: string;
   price: number;
   originalPrice?: number;
   category: string;
