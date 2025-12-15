@@ -149,21 +149,6 @@ export default function NewArrivalCard({
           NEW
         </Badge>
 
-        {rating > 0 && (
-          <div className="absolute bottom-12 left-2 flex items-center gap-1 bg-white/90 px-2 py-1 rounded">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-3 w-3 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                />
-              ))}
-            </div>
-            <span className="text-xs font-medium text-gray-700" data-testid={`text-review-count-${id}`}>
-              ({reviewCount})
-            </span>
-          </div>
-        )}
 
         <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2">
           <Button 
@@ -189,9 +174,20 @@ export default function NewArrivalCard({
       </div>
 
       <CardContent className="p-3">
-        <h3 className="font-medium text-sm mb-2 line-clamp-2 min-h-[40px]" data-testid={`text-product-name-${id}`}>
-          {name}
-        </h3>
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className="font-medium text-sm line-clamp-2 flex-1" data-testid={`text-product-name-${id}`}>
+            {name}
+          </h3>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 flex-shrink-0 -mt-1"
+            onClick={handleWishlist}
+            data-testid={`button-wishlist-text-${id}`}
+          >
+            <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-destructive text-destructive' : ''}`} />
+          </Button>
+        </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-lg font-bold text-black" data-testid={`text-price-${id}`}>

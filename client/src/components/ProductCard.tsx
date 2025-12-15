@@ -225,25 +225,20 @@ export default function ProductCard({
       </div>
 
       <CardContent className="p-4">
-        {rating > 0 && (
-          <div className="flex items-center gap-1 mb-2">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-3 w-3 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                />
-              ))}
-            </div>
-            <span className="text-xs text-muted-foreground" data-testid={`text-review-count-${id}`}>
-              ({reviewCount})
-            </span>
-          </div>
-        )}
-
-        <h3 className="font-medium text-sm mb-2 line-clamp-2" data-testid={`text-product-name-${id}`}>
-          {name}
-        </h3>
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className="font-medium text-sm line-clamp-2 flex-1" data-testid={`text-product-name-${id}`}>
+            {name}
+          </h3>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 flex-shrink-0 -mt-1"
+            onClick={handleWishlist}
+            data-testid={`button-wishlist-text-${id}`}
+          >
+            <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-destructive text-destructive' : ''}`} />
+          </Button>
+        </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-lg font-bold text-black" data-testid={`text-price-${id}`}>
