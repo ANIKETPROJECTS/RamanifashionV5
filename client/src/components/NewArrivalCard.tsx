@@ -123,7 +123,7 @@ export default function NewArrivalCard({
       onClick={() => onClick ? onClick() : setLocation(`/product/${id}`)}
       data-testid={`card-new-arrival-${id}`}
     >
-      <div className="relative aspect-[3/5] overflow-hidden bg-gray-100">
+      <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
         <img
           src={currentImage || placeholderImage}
           alt={name}
