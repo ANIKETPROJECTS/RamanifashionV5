@@ -106,7 +106,7 @@ export default function CustomerManagement() {
       if (paidUsersOnly) params.set('paidUsers', 'true');
       if (filterCity) params.set('city', filterCity);
       if (filterState) params.set('state', filterState);
-      if (lastActivityDays) params.set('lastActivityDays', lastActivityDays);
+      if (lastActivityDays && lastActivityDays !== 'all') params.set('lastActivityDays', lastActivityDays);
       
       const url = `/api/admin/customers?${params.toString()}`;
       const res = await fetch(url, {
@@ -311,7 +311,7 @@ export default function CustomerManagement() {
                     <SelectValue placeholder="Last Activity" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Time</SelectItem>
+                    <SelectItem value="all">All Time</SelectItem>
                     <SelectItem value="7">Active in 7 days</SelectItem>
                     <SelectItem value="30">Active in 30 days</SelectItem>
                     <SelectItem value="90">Active in 90 days</SelectItem>
