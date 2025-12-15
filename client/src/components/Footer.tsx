@@ -38,70 +38,72 @@ export default function Footer() {
   return (
     <footer className="bg-gradient-to-b from-pink-50 to-white border-t mt-16">
       <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-8">
-          <div className="lg:col-span-2 flex flex-col items-center lg:items-start">
-            <img
-              src={logoImage}
-              alt="Ramani Fashion"
-              className="h-24 md:h-28 w-auto object-contain mb-4"
-              data-testid="img-footer-logo"
-            />
-            <p className="text-sm text-muted-foreground mb-4 text-center lg:text-left">
-              Your destination for authentic handloom sarees and traditional
-              Indian ethnic wear.
-            </p>
-            <div className="flex items-start gap-6">
-              <a
-                href="https://www.instagram.com/ramanifashionindia/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity min-w-0"
-                data-testid="link-instagram-footer"
-              >
-                <img
-                  src={instagramIcon}
-                  alt="Instagram"
-                  className="h-6 w-6 flex-shrink-0"
-                />
-                <span className="text-xs font-medium text-black text-center leading-tight">
-                  @ramanifashionindia
-                </span>
-              </a>
-              <a
-                href="https://www.facebook.com/186191114586811"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity min-w-0"
-                data-testid="link-facebook-footer"
-              >
-                <img
-                  src={facebookIcon}
-                  alt="Facebook"
-                  className="h-6 w-6 flex-shrink-0"
-                />
-                <span className="text-xs font-medium text-black text-center leading-tight">
-                  Ramani
-                  <br />
-                  Fashion
-                </span>
-              </a>
-              <a
-                href="https://chat.whatsapp.com/GqIsU9ZF2SJ9buuSKxGFWB"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity min-w-0"
-                data-testid="link-whatsapp-footer"
-              >
-                <SiWhatsapp className="h-6 w-6 text-green-600 flex-shrink-0" />
-                <span className="text-xs font-medium text-black text-center leading-tight">
-                  WhatsApp
-                  <br />
-                  Group
-                </span>
-              </a>
-            </div>
+        {/* Centered Logo Section */}
+        <div className="flex flex-col items-center mb-12 text-center">
+          <img
+            src={logoImage}
+            alt="Ramani Fashion"
+            className="h-24 md:h-28 w-auto object-contain mb-4"
+            data-testid="img-footer-logo"
+          />
+          <p className="text-sm text-muted-foreground mb-6 max-w-md">
+            Your destination for authentic handloom sarees and traditional
+            Indian ethnic wear.
+          </p>
+          <div className="flex items-center justify-center gap-6">
+            <a
+              href="https://www.instagram.com/ramanifashionindia/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity min-w-0"
+              data-testid="link-instagram-footer"
+            >
+              <img
+                src={instagramIcon}
+                alt="Instagram"
+                className="h-6 w-6 flex-shrink-0"
+              />
+              <span className="text-xs font-medium text-black text-center leading-tight">
+                @ramanifashionindia
+              </span>
+            </a>
+            <a
+              href="https://www.facebook.com/186191114586811"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity min-w-0"
+              data-testid="link-facebook-footer"
+            >
+              <img
+                src={facebookIcon}
+                alt="Facebook"
+                className="h-6 w-6 flex-shrink-0"
+              />
+              <span className="text-xs font-medium text-black text-center leading-tight">
+                Ramani
+                <br />
+                Fashion
+              </span>
+            </a>
+            <a
+              href="https://chat.whatsapp.com/GqIsU9ZF2SJ9buuSKxGFWB"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity min-w-0"
+              data-testid="link-whatsapp-footer"
+            >
+              <SiWhatsapp className="h-6 w-6 text-green-600 flex-shrink-0" />
+              <span className="text-xs font-medium text-black text-center leading-tight">
+                WhatsApp
+                <br />
+                Group
+              </span>
+            </a>
           </div>
+        </div>
 
+        {/* Grid for Categories, Quick Links, Newsletter */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
             <h4 className="font-semibold text-lg mb-4 text-primary">
               Categories
@@ -243,19 +245,6 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-
-          {/* 
-          <div>
-            <h4 className="font-semibold text-lg mb-4 text-primary">Customer Service</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/shipping" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-shipping">Shipping Info</Link></li>
-              <li><Link href="/returns" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-returns">Returns & Exchange</Link></li>
-              <li><Link href="/faq" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-faq">FAQs</Link></li>
-              <li><Link href="/size-guide" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-size-guide">Size Guide</Link></li>
-              <li><Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-policy">Policy Page</Link></li>
-            </ul>
-          </div>
-          */}
 
           <div>
             <h4 className="font-semibold text-lg mb-4 text-primary">
