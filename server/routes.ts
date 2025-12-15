@@ -1499,9 +1499,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/admin/products/:id", authenticateAdmin, async (req, res) => {
     try {
+      const updateData = { ...req.body, updatedAt: new Date() };
+      
+      // Automatically set inStock based on stockQuantity
+      if (updateData.stockQuantity !== undefined) {
+        updateData.inStock = updateData.stockQuantity > 0;
+      }
+      
       const product = await Product.findByIdAndUpdate(
         req.params.id,
-        { ...req.body, updatedAt: new Date() },
+        updateData,
         { new: true }
       );
       if (!product) {
