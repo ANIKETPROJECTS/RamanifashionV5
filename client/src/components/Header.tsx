@@ -388,7 +388,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                     >
                       CATEGORIES
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent className="fixed left-1/2 bg-transparent shadow-none border-0 py-6" style={{ transform: "translateX(calc(-50% + 120px))" }}>
+                    <NavigationMenuContent className="fixed left-1/2 bg-transparent shadow-none border-0 py-6" style={{ transform: "translateX(calc(-50% + 80px))" }}>
                       <div className="px-6 md:px-12">
                         <div className="flex flex-nowrap gap-3 md:gap-4 lg:gap-5 justify-center items-start">
                           <Link
