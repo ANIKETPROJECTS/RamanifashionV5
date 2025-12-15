@@ -1178,6 +1178,17 @@ export default function Home() {
 
       <Footer />
 
+      <a
+        href="https://chat.whatsapp.com/GqIsU9ZF2SJ9buuSKxGFWB"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center"
+        data-testid="button-whatsapp-floating"
+        aria-label="Chat on WhatsApp"
+      >
+        <FaWhatsapp className="w-6 h-6" />
+      </a>
+
       <Dialog
         open={!!selectedImage}
         onOpenChange={() => setSelectedImage(null)}
