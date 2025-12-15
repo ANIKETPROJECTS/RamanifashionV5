@@ -80,6 +80,10 @@ export default function CustomerManagement() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [page, setPage] = useState(1);
+  const [paidUsersOnly, setPaidUsersOnly] = useState(false);
+  const [filterCity, setFilterCity] = useState("");
+  const [filterState, setFilterState] = useState("");
+  const [lastActivityDays, setLastActivityDays] = useState("");
   const limit = 50;
 
   const { data: customersData, isLoading, error } = useQuery<{
@@ -91,7 +95,7 @@ export default function CustomerManagement() {
       totalPages: number;
     };
   }>({
-    queryKey: ["/api/admin/customers", searchQuery, sortBy, sortOrder, page, limit],
+    queryKey: ["/api/admin/customers", searchQuery, sortBy, sortOrder, page, limit, paidUsersOnly, filterCity, filterState, lastActivityDays],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.set('search', searchQuery);
@@ -99,6 +103,10 @@ export default function CustomerManagement() {
       params.set('order', sortOrder);
       params.set('page', page.toString());
       params.set('limit', limit.toString());
+      if (paidUsersOnly) params.set('paidUsers', 'true');
+      if (filterCity) params.set('city', filterCity);
+      if (filterState) params.set('state', filterState);
+      if (lastActivityDays) params.set('lastActivityDays', lastActivityDays);
       
       const url = `/api/admin/customers?${params.toString()}`;
       const res = await fetch(url, {
@@ -266,6 +274,62 @@ export default function CustomerManagement() {
                   <SelectItem value="asc">Oldest First</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-3 border-t pt-4">
+              <div className="text-sm font-medium">Advanced Filters</div>
+              <div className="flex flex-wrap gap-4">
+                <div className="flex-1 min-w-[150px]">
+                  <Input
+                    placeholder="Filter by city..."
+                    value={filterCity}
+                    onChange={(e) => {
+                      setFilterCity(e.target.value);
+                      setPage(1);
+                    }}
+                    data-testid="input-filter-city"
+                  />
+                </div>
+
+                <div className="flex-1 min-w-[150px]">
+                  <Input
+                    placeholder="Filter by state..."
+                    value={filterState}
+                    onChange={(e) => {
+                      setFilterState(e.target.value);
+                      setPage(1);
+                    }}
+                    data-testid="input-filter-state"
+                  />
+                </div>
+
+                <Select value={lastActivityDays} onValueChange={(value) => {
+                  setLastActivityDays(value);
+                  setPage(1);
+                }}>
+                  <SelectTrigger className="w-[180px]" data-testid="select-last-activity">
+                    <SelectValue placeholder="Last Activity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Time</SelectItem>
+                    <SelectItem value="7">Active in 7 days</SelectItem>
+                    <SelectItem value="30">Active in 30 days</SelectItem>
+                    <SelectItem value="90">Active in 90 days</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  variant={paidUsersOnly ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setPaidUsersOnly(!paidUsersOnly);
+                    setPage(1);
+                  }}
+                  data-testid="button-paid-users-filter"
+                >
+                  {paidUsersOnly ? "✓ Paid Users" : "Paid Users"}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

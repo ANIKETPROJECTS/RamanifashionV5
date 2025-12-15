@@ -1984,7 +1984,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sort = 'createdAt',
         order = 'desc',
         page = '1',
-        limit = '50'
+        limit = '50',
+        paidUsers,
+        city,
+        state,
+        lastActivityDays
       } = req.query;
 
       const query: any = {};
@@ -1997,6 +2001,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           { name: searchRegex },
           { email: searchRegex }
         ];
+      }
+
+      // Filter by paid users (customers with at least one paid/completed order)
+      if (paidUsers === 'true') {
+        const paidCustomerIds = await Order.find({
+          paymentStatus: 'paid'
+        }).distinct('userId').lean();
+        query._id = { $in: paidCustomerIds };
+      }
+
+      // Filter by city
+      if (city && city !== '') {
+        query['address.city'] = new RegExp(city as string, 'i');
+      }
+
+      // Filter by state
+      if (state && state !== '') {
+        query['address.state'] = new RegExp(state as string, 'i');
+      }
+
+      // Filter by last activity (lastLogin within N days)
+      if (lastActivityDays) {
+        const days = parseInt(lastActivityDays as string);
+        const dateThreshold = new Date();
+        dateThreshold.setDate(dateThreshold.getDate() - days);
+        query.lastLogin = { $gte: dateThreshold };
       }
 
       const pageNum = parseInt(page as string);
