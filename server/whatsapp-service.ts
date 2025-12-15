@@ -99,6 +99,49 @@ export async function sendWhatsAppOTP({ phoneNumber, otp }: WhatsAppOTPParams): 
   }
 }
 
+export async function sendOrderConfirmation(phoneNumber: string, orderNumber: string, customerName: string): Promise<boolean> {
+  if (!WHATSAPP_API_KEY || !WHATSAPP_PHONE_NUMBER_ID) {
+    console.warn('WhatsApp API credentials not configured for order confirmation');
+    return false;
+  }
+
+  try {
+    const formattedPhone = formatPhoneNumber(phoneNumber);
+    
+    const payload = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: formattedPhone,
+      type: "text",
+      text: {
+        preview_url: false,
+        body: `Hi ${customerName},\n\nYour order #${orderNumber} has been confirmed and is being processed. You'll receive a tracking update soon.\n\nThank you for shopping with Ramani Fashion!`
+      }
+    };
+
+    const response = await fetch(`${WHATSAPP_BASE_URL}/send/${WHATSAPP_PHONE_NUMBER_ID}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${WHATSAPP_API_KEY}`,
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('WhatsApp order confirmation error:', errorText);
+      return false;
+    }
+
+    console.log('Order confirmation sent to:', formattedPhone);
+    return true;
+  } catch (error) {
+    console.error('Error sending order confirmation:', error);
+    return false;
+  }
+}
+
 export function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }

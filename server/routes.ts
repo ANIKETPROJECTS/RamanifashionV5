@@ -10,7 +10,7 @@ import path from "path";
 import fs from "fs";
 import XLSX from "xlsx";
 import { upload, mediaUpload } from "./upload-config";
-import { sendWhatsAppOTP, generateOTP } from "./whatsapp-service";
+import { sendWhatsAppOTP, generateOTP, sendOrderConfirmation } from "./whatsapp-service";
 import { phonePeService } from "./phonepe-service";
 import { shiprocketService } from "./shiprocket.service";
 
@@ -1244,6 +1244,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Update order in database with final payment status
+      if (merchantOrderId) {
+        const dbPaymentStatus = paymentStatus === 'COMPLETED' ? 'paid' : 
+                              paymentStatus === 'FAILED' ? 'failed' : 'pending';
+        try {
+          await Order.findOneAndUpdate(
+            { phonePeMerchantOrderId: merchantOrderId },
+            {
+              phonePePaymentState: paymentStatus,
+              paymentStatus: dbPaymentStatus,
+              orderStatus: dbPaymentStatus === 'paid' ? 'processing' : undefined,
+              updatedAt: new Date(),
+            },
+            { new: true }
+          );
+          console.log('Updated order payment status to:', dbPaymentStatus);
+        } catch (dbError: any) {
+          console.error('Error updating order payment status:', dbError.message);
+        }
+      }
+
       // Find the frontend base URL (use HOST_URL)
       const frontendUrl = process.env.HOST_URL || 'https://ramanifashion.in';
 
@@ -2355,6 +2376,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`\n✅ Order ${order.orderNumber} approved and sent to Shiprocket`);
       console.log('=== ORDER APPROVAL COMPLETED ===\n');
+
+      // Send order confirmation notification to customer
+      try {
+        const customerPhone = order.shippingAddress.phone;
+        const customerName = order.shippingAddress.fullName.split(' ')[0] || 'Customer';
+        await sendOrderConfirmation(customerPhone, order.orderNumber, customerName);
+        console.log('✅ Order confirmation sent to customer:', customerPhone);
+      } catch (notificationError: any) {
+        console.error('⚠️ Failed to send order confirmation:', notificationError.message);
+        // Don't fail the entire request if notification fails
+      }
 
       const populatedOrder = await Order.findById(order._id)
         .populate('userId', 'name email phone')
