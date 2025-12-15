@@ -79,6 +79,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
   const [searchResults, setSearchResults] = useState<SearchProduct[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [searchBarOpen, setSearchBarOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -325,8 +326,8 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
       <div className="max-w-7xl mx-auto px-4 py-2">
-        <div className="grid grid-cols-3 items-center gap-6">
-          <div className="flex items-start gap-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 md:gap-6">
             <Button
               size="icon"
               variant="ghost"
@@ -337,148 +338,235 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
               <Menu className="h-5 w-5" />
             </Button>
 
-            <div className="hidden md:flex items-start gap-8">
-              <a 
-                href="https://www.instagram.com/ramanifashionindia/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity group"
-                data-testid="link-instagram"
-              >
-                <img src={instagramIcon} alt="Instagram" className="h-6 w-6" />
-                <span className="text-xs font-medium text-black">@ramanifashionindia</span>
-              </a>
-              <a 
-                href="https://www.facebook.com/186191114586811" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity group"
-                data-testid="link-facebook"
-              >
-                <img src={facebookIcon} alt="Facebook" className="h-6 w-6" />
-                <span className="text-xs font-medium text-black">Ramani Fashion</span>
-              </a>
-              <a 
-                href="https://chat.whatsapp.com/GqIsU9ZF2SJ9buuSKxGFWB" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity group"
-                data-testid="link-whatsapp"
-              >
-                <SiWhatsapp className="h-6 w-6 text-green-600" />
-                <span className="text-xs font-medium text-black">WhatsApp Group</span>
-              </a>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center">
-            <Link href="/" className="flex items-center justify-center">
+            <Link href="/" className="flex items-center flex-shrink-0">
               <img 
                 src={logoImage}
                 alt="Ramani Fashion" 
-                className="h-16 md:h-18 lg:h-20 w-auto object-contain"
+                className="h-12 md:h-14 lg:h-16 w-auto object-contain"
                 data-testid="img-logo"
               />
             </Link>
+
+            {/* Desktop Navigation - inline with logo */}
+            <nav className="hidden md:block">
+              <NavigationMenu>
+                <NavigationMenuList className="flex items-center gap-1 lg:gap-2">
+                  <NavigationMenuItem>
+                    <a 
+                      href="/" 
+                      onClick={handleHomeClick} 
+                      className={`nav-link px-2 lg:px-3 py-2 tracking-wide text-sm lg:text-base font-medium whitespace-nowrap ${navState.isHome ? "active text-primary" : ""}`} 
+                      data-testid="link-home"
+                    >
+                      HOME
+                    </a>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link 
+                      href="/new-arrivals" 
+                      className={`nav-link px-2 lg:px-3 py-2 tracking-wide text-sm lg:text-base font-medium whitespace-nowrap ${navState.isNewArrivals ? "active text-primary" : ""}`} 
+                      data-testid="link-new-arrivals"
+                    >
+                      NEW ARRIVALS
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link 
+                      href="/trending-collection" 
+                      className={`nav-link px-2 lg:px-3 py-2 tracking-wide text-sm lg:text-base font-medium whitespace-nowrap ${navState.isTrending ? "active text-primary" : ""}`} 
+                      data-testid="link-trending-collection"
+                    >
+                      TRENDING
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger 
+                      className={`px-2 lg:px-3 py-2 tracking-wide text-sm lg:text-base font-medium bg-transparent hover:bg-transparent data-[state=open]:bg-transparent whitespace-nowrap ${navState.isCategories ? "nav-link active text-primary" : ""}`} 
+                      data-testid="link-categories"
+                    >
+                      CATEGORIES
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent className="left-1/2 right-auto -translate-x-1/2 w-full max-w-7xl bg-transparent shadow-none border-0">
+                      <div className="w-full px-6 md:px-12 py-6">
+                        <div className="flex flex-nowrap gap-3 md:gap-4 lg:gap-5 justify-center items-start mx-auto">
+                          <Link
+                            href="/products?category=Jamdani Paithani"
+                            className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
+                            data-testid="category-jamdani-paithani"
+                          >
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                              <img
+                                src={paithaniImage}
+                                alt="Jamdani Paithani"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                            </div>
+                            <div className="mt-2 md:mt-3 text-center">
+                              <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
+                                Jamdani Paithani
+                              </span>
+                            </div>
+                          </Link>
+                          <Link
+                            href="/products?category=Khun Irkal"
+                            className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
+                            data-testid="category-khun-irkal"
+                          >
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                              <img
+                                src={khunIrkalImage}
+                                alt="Khun / Irkal (Ilkal)"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                            </div>
+                            <div className="mt-2 md:mt-3 text-center">
+                              <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
+                                Khun / Irkal (Ilkal)
+                              </span>
+                            </div>
+                          </Link>
+                          <Link
+                            href="/products?category=Ajrakh Modal"
+                            className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
+                            data-testid="category-ajrakh-modal"
+                          >
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                              <img
+                                src={ajrakhModalImage}
+                                alt="Ajrakh Modal"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                            </div>
+                            <div className="mt-2 md:mt-3 text-center">
+                              <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
+                                Ajrakh Modal
+                              </span>
+                            </div>
+                          </Link>
+                          <Link
+                            href="/products?category=Mul Mul Cotton"
+                            className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
+                            data-testid="category-mul-mul-cotton"
+                          >
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                              <img
+                                src={mulCottonImage}
+                                alt="Mul Mul Cotton"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                            </div>
+                            <div className="mt-2 md:mt-3 text-center">
+                              <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
+                                Mul Mul Cotton
+                              </span>
+                            </div>
+                          </Link>
+                          <Link
+                            href="/products?category=Khadi Cotton"
+                            className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
+                            data-testid="category-khadi-cotton"
+                          >
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                              <img
+                                src={khadiCottonImage}
+                                alt="Khadi Cotton"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                            </div>
+                            <div className="mt-2 md:mt-3 text-center">
+                              <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
+                                Khadi Cotton
+                              </span>
+                            </div>
+                          </Link>
+                          <Link
+                            href="/products?category=Patch Work"
+                            className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
+                            data-testid="category-patch-work"
+                          >
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                              <img
+                                src={patchWorkImage}
+                                alt="Patch Work"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                            </div>
+                            <div className="mt-2 md:mt-3 text-center">
+                              <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
+                                Patch Work
+                              </span>
+                            </div>
+                          </Link>
+                          <Link
+                            href="/products?category=Pure Linen"
+                            className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
+                            data-testid="category-pure-linen"
+                          >
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                              <img
+                                src={pureLinenImage}
+                                alt="Pure Linen"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                            </div>
+                            <div className="mt-2 md:mt-3 text-center">
+                              <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
+                                Pure Linen
+                              </span>
+                            </div>
+                          </Link>
+                        </div>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link 
+                      href="/sale" 
+                      className={`nav-link px-2 lg:px-3 py-2 tracking-wide text-sm lg:text-base font-medium whitespace-nowrap ${navState.isSale ? "active text-primary" : ""}`} 
+                      data-testid="link-sale"
+                    >
+                      SALE
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link 
+                      href="/about" 
+                      className={`nav-link px-2 lg:px-3 py-2 tracking-wide text-sm lg:text-base font-medium whitespace-nowrap ${navState.isAbout ? "active text-primary" : ""}`} 
+                      data-testid="link-about"
+                    >
+                      ABOUT US
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <button 
+                      onClick={handleContactClick} 
+                      className={`nav-link px-2 lg:px-3 py-2 tracking-wide text-sm lg:text-base font-medium bg-transparent border-0 cursor-pointer whitespace-nowrap ${navState.isContact ? "active text-primary" : ""}`}
+                      data-testid="link-contact"
+                    >
+                      CONTACT
+                    </button>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+            </nav>
           </div>
 
-          <div className="flex items-center justify-end gap-6">
-            <div ref={searchRef} className="hidden md:flex items-center relative">
-              <form onSubmit={handleSearchSubmit} className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
-                <Input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  onFocus={handleSearchFocus}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
-                  className="pl-11 pr-10 py-2.5 w-80 text-base bg-gray-50 border-gray-200 rounded-full focus:bg-white transition-colors"
-                  data-testid="input-search"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery("");
-                      setSearchResults([]);
-                      setShowDropdown(false);
-                      searchInputRef.current?.focus();
-                    }}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    data-testid="button-clear-search"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </form>
-
-              {/* Search Dropdown */}
-              {showDropdown && (searchQuery.trim().length >= 2 || isSearching) && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden">
-                  {isSearching ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                      <span className="ml-2 text-sm text-muted-foreground">Searching...</span>
-                    </div>
-                  ) : searchResults.length > 0 ? (
-                    <>
-                      <ScrollArea className="max-h-[400px]">
-                        <div className="py-2">
-                          {searchResults.map((product) => (
-                            <button
-                              key={product._id}
-                              onClick={() => handleProductClick(product._id)}
-                              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
-                              data-testid={`search-result-${product._id}`}
-                            >
-                              <div className="w-14 h-14 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
-                                <img
-                                  src={product.displayImage || "/default-saree.jpg"}
-                                  alt={product.name}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => { e.currentTarget.src = '/default-saree.jpg'; }}
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 line-clamp-2">
-                                  {product.name}
-                                </p>
-                                <p className="text-xs text-muted-foreground truncate">
-                                  {product.category}
-                                  {product.displayColor && ` - ${product.displayColor}`}
-                                </p>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-sm font-semibold text-primary">
-                                    Rs. {product.price.toLocaleString('en-IN')}
-                                  </span>
-                                  {product.originalPrice && product.originalPrice > product.price && (
-                                    <span className="text-xs text-muted-foreground line-through">
-                                      Rs. {product.originalPrice.toLocaleString('en-IN')}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </>
-                  ) : searchQuery.trim().length >= 2 ? (
-                    <div className="py-8 px-4 text-center">
-                      <Search className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">
-                        No products found for "{searchQuery}"
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Try a different search term
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-              )}
-            </div>
+          <div className="flex items-center justify-end gap-2 md:gap-4">
+            {/* Search Button */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-10 w-10 md:h-12 md:w-12"
+              onClick={() => {
+                setSearchBarOpen(!searchBarOpen);
+                if (!searchBarOpen) {
+                  setTimeout(() => searchInputRef.current?.focus(), 100);
+                }
+              }}
+              data-testid="button-search-toggle"
+            >
+              <Search className="h-5 w-5 md:h-6 md:w-6" />
+            </Button>
 
             {user ? (
               <DropdownMenu>
@@ -547,215 +635,105 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
         </div>
       </div>
 
-      <nav className="hidden md:block bg-white relative">
-        <div className="w-full">
-          <NavigationMenu className="max-w-7xl mx-auto">
-            <NavigationMenuList className="flex items-center justify-center gap-8 py-2 w-full">
-              <NavigationMenuItem>
-                <a 
-                  href="/" 
-                  onClick={handleHomeClick} 
-                  className={`nav-link px-4 py-2 tracking-wide text-base font-medium ${navState.isHome ? "active text-primary" : ""}`} 
-                  data-testid="link-home"
+      {/* Expandable Search Bar */}
+      {searchBarOpen && (
+        <div ref={searchRef} className="border-t bg-white px-4 py-3">
+          <div className="max-w-7xl mx-auto">
+            <form onSubmit={handleSearchSubmit} className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
+              <Input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onFocus={handleSearchFocus}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+                className="pl-11 pr-10 py-2.5 w-full text-base bg-gray-50 border-gray-200 rounded-full focus:bg-white transition-colors"
+                data-testid="input-search"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSearchResults([]);
+                    setShowDropdown(false);
+                    searchInputRef.current?.focus();
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  data-testid="button-clear-search"
                 >
-                  HOME
-                </a>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link 
-                  href="/new-arrivals" 
-                  className={`nav-link px-4 py-2 tracking-wide text-base font-medium ${navState.isNewArrivals ? "active text-primary" : ""}`} 
-                  data-testid="link-new-arrivals"
-                >
-                  NEW ARRIVALS
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link 
-                  href="/trending-collection" 
-                  className={`nav-link px-4 py-2 tracking-wide text-base font-medium ${navState.isTrending ? "active text-primary" : ""}`} 
-                  data-testid="link-trending-collection"
-                >
-                  TRENDING COLLECTION
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger 
-                  className={`px-4 py-2 tracking-wide text-base font-medium bg-transparent hover:bg-transparent data-[state=open]:bg-transparent ${navState.isCategories ? "nav-link active text-primary" : ""}`} 
-                  data-testid="link-categories"
-                >
-                  CATEGORIES
-                </NavigationMenuTrigger>
-                <NavigationMenuContent className="left-1/2 right-auto -translate-x-1/2 w-full max-w-7xl bg-transparent shadow-none border-0">
-                  <div className="w-full px-6 md:px-12 py-6">
-                    <div className="flex flex-nowrap gap-3 md:gap-4 lg:gap-5 justify-center items-start mx-auto">
-                      <Link
-                        href="/products?category=Jamdani Paithani"
-                        className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
-                        data-testid="category-jamdani-paithani"
-                      >
-                        <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
-                          <img
-                            src={paithaniImage}
-                            alt="Jamdani Paithani"
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </div>
-                        <div className="mt-2 md:mt-3 text-center">
-                          <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
-                            Jamdani Paithani
-                          </span>
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/products?category=Khun Irkal"
-                        className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
-                        data-testid="category-khun-irkal"
-                      >
-                        <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
-                          <img
-                            src={khunIrkalImage}
-                            alt="Khun / Irkal (Ilkal)"
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </div>
-                        <div className="mt-2 md:mt-3 text-center">
-                          <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
-                            Khun / Irkal (Ilkal)
-                          </span>
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/products?category=Ajrakh Modal"
-                        className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
-                        data-testid="category-ajrakh-modal"
-                      >
-                        <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
-                          <img
-                            src={ajrakhModalImage}
-                            alt="Ajrakh Modal"
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </div>
-                        <div className="mt-2 md:mt-3 text-center">
-                          <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
-                            Ajrakh Modal
-                          </span>
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/products?category=Mul Mul Cotton"
-                        className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
-                        data-testid="category-mul-mul-cotton"
-                      >
-                        <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
-                          <img
-                            src={mulCottonImage}
-                            alt="Mul Mul Cotton"
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </div>
-                        <div className="mt-2 md:mt-3 text-center">
-                          <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
-                            Mul Mul Cotton
-                          </span>
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/products?category=Khadi Cotton"
-                        className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
-                        data-testid="category-khadi-cotton"
-                      >
-                        <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
-                          <img
-                            src={khadiCottonImage}
-                            alt="Khadi Cotton"
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </div>
-                        <div className="mt-2 md:mt-3 text-center">
-                          <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
-                            Khadi Cotton
-                          </span>
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/products?category=Patch Work"
-                        className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
-                        data-testid="category-patch-work"
-                      >
-                        <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
-                          <img
-                            src={patchWorkImage}
-                            alt="Patch Work"
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </div>
-                        <div className="mt-2 md:mt-3 text-center">
-                          <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
-                            Patch Work
-                          </span>
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/products?category=Pure Linen"
-                        className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
-                        data-testid="category-pure-linen"
-                      >
-                        <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
-                          <img
-                            src={pureLinenImage}
-                            alt="Pure Linen"
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </div>
-                        <div className="mt-2 md:mt-3 text-center">
-                          <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-pink-500 px-2 sm:px-3 md:px-4 py-1 md:py-1.5 rounded-full inline-block whitespace-nowrap">
-                            Pure Linen
-                          </span>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link 
-                  href="/sale" 
-                  className={`nav-link px-4 py-2 tracking-wide text-base font-medium ${navState.isSale ? "active text-primary" : ""}`} 
-                  data-testid="link-sale"
-                >
-                  SALE
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link 
-                  href="/about" 
-                  className={`nav-link px-4 py-2 tracking-wide text-base font-medium ${navState.isAbout ? "active text-primary" : ""}`} 
-                  data-testid="link-about"
-                >
-                  ABOUT US
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <button 
-                  onClick={handleContactClick} 
-                  className={`nav-link px-4 py-2 tracking-wide text-base font-medium bg-transparent border-0 cursor-pointer ${navState.isContact ? "active text-primary" : ""}`}
-                  data-testid="link-contact"
-                >
-                  CONTACT
+                  <X className="h-4 w-4" />
                 </button>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+              )}
+            </form>
+
+            {/* Search Dropdown */}
+            {showDropdown && (searchQuery.trim().length >= 2 || isSearching) && (
+              <div className="mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden">
+                {isSearching ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    <span className="ml-2 text-sm text-muted-foreground">Searching...</span>
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <ScrollArea className="max-h-[400px]">
+                    <div className="py-2">
+                      {searchResults.map((product) => (
+                        <button
+                          key={product._id}
+                          onClick={() => handleProductClick(product._id)}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
+                          data-testid={`search-result-${product._id}`}
+                        >
+                          <div className="w-14 h-14 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
+                            <img
+                              src={product.displayImage || "/default-saree.jpg"}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => { e.currentTarget.src = '/default-saree.jpg'; }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 line-clamp-2">
+                              {product.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {product.category}
+                              {product.displayColor && ` - ${product.displayColor}`}
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-sm font-semibold text-primary">
+                                Rs. {product.price.toLocaleString('en-IN')}
+                              </span>
+                              {product.originalPrice && product.originalPrice > product.price && (
+                                <span className="text-xs text-muted-foreground line-through">
+                                  Rs. {product.originalPrice.toLocaleString('en-IN')}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                ) : searchQuery.trim().length >= 2 ? (
+                  <div className="py-8 px-4 text-center">
+                    <Search className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      No products found for "{searchQuery}"
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Try a different search term
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
         </div>
-      </nav>
+      )}
 
       {/* Mobile Navigation Menu */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
