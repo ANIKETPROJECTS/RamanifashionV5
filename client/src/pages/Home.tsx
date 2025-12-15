@@ -265,7 +265,7 @@ export default function Home() {
         </motion.div>
 
         <motion.section 
-          className="py-8 md:py-12 bg-white"
+          className="py-4 md:py-6 bg-white"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
