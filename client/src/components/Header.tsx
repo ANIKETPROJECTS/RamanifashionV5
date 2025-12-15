@@ -388,9 +388,9 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                     >
                       CATEGORIES
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent className="left-1/2 right-auto -translate-x-1/2 w-full max-w-7xl bg-transparent shadow-none border-0">
-                      <div className="w-full px-6 md:px-12 py-6">
-                        <div className="flex flex-nowrap gap-3 md:gap-4 lg:gap-5 justify-center items-start mx-auto">
+                    <NavigationMenuContent className="fixed left-1/2 -translate-x-1/2 w-screen bg-transparent shadow-none border-0">
+                      <div className="w-full max-w-7xl mx-auto px-6 md:px-12 py-6">
+                        <div className="flex flex-nowrap gap-3 md:gap-4 lg:gap-5 justify-center items-start">
                           <Link
                             href="/products?category=Jamdani Paithani"
                             className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
