@@ -553,7 +553,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
             </nav>
 
           {/* Right section - Icons */}
-          <div className="flex items-center justify-end gap-2 md:gap-4 flex-shrink-0">
+          <div className="flex items-center justify-end gap-1 md:gap-2 flex-shrink-0">
             {/* Search Button */}
             <Button 
               variant="ghost" 
