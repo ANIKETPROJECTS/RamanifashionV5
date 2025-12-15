@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { Heart, ShoppingBag, Star, Zap } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
@@ -209,7 +209,7 @@ export default function ProductCard({
             onClick={handleAddToCart}
             data-testid={`button-add-to-cart-${id}`}
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
+            <ShoppingBag className="h-4 w-4 mr-2" />
             Add to Cart
           </Button>
           <Button 
@@ -218,6 +218,7 @@ export default function ProductCard({
             onClick={handleBuyNow}
             data-testid={`button-buy-now-${id}`}
           >
+            <Zap className="h-4 w-4 mr-2" />
             Buy Now
           </Button>
         </div>

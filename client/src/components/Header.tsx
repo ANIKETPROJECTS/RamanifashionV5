@@ -327,7 +327,8 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
     <header className="sticky top-0 z-50 w-full bg-white">
       <div className="max-w-7xl mx-auto px-4 py-2">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 md:gap-6">
+          {/* Left section - Mobile menu and Logo */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Button
               size="icon"
               variant="ghost"
@@ -346,9 +347,10 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                 data-testid="img-logo"
               />
             </Link>
+          </div>
 
-            {/* Desktop Navigation - inline with logo */}
-            <nav className="hidden md:block">
+          {/* Center section - Desktop Navigation */}
+          <nav className="hidden md:flex flex-1 justify-center">
               <NavigationMenu>
                 <NavigationMenuList className="flex items-center gap-1 lg:gap-2">
                   <NavigationMenuItem>
@@ -549,9 +551,9 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                 </NavigationMenuList>
               </NavigationMenu>
             </nav>
-          </div>
 
-          <div className="flex items-center justify-end gap-2 md:gap-4">
+          {/* Right section - Icons */}
+          <div className="flex items-center justify-end gap-2 md:gap-4 flex-shrink-0">
             {/* Search Button */}
             <Button 
               variant="ghost" 

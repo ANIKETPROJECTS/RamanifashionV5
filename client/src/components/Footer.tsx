@@ -39,14 +39,14 @@ export default function Footer() {
     <footer className="bg-gradient-to-b from-pink-50 to-white border-t mt-16">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-8">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 flex flex-col items-center lg:items-start">
             <img
               src={logoImage}
               alt="Ramani Fashion"
               className="h-24 md:h-28 w-auto object-contain mb-4"
               data-testid="img-footer-logo"
             />
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-4 text-center lg:text-left">
               Your destination for authentic handloom sarees and traditional
               Indian ethnic wear.
             </p>
