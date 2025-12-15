@@ -36,6 +36,8 @@ interface ProductCardProps {
   isNew?: boolean;
   isBestseller?: boolean;
   context?: 'new-arrivals' | 'trending' | 'sale' | 'products';
+  shortDescription?: string;
+  description?: string;
   onAddToCart?: () => void;
   onAddToWishlist?: () => void;
   onBuyNow?: () => void;
@@ -57,6 +59,8 @@ export default function ProductCard({
   isNew,
   isBestseller,
   context,
+  shortDescription,
+  description,
   onAddToCart,
   onAddToWishlist,
   onBuyNow,
@@ -67,6 +71,10 @@ export default function ProductCard({
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { openLogin } = useAuthUI();
+
+  // Extract short description from full description
+  const displayShortDescription = shortDescription || 
+    (description ? description.split(/[.\n]/).find(s => s.trim())?.trim()?.substring(0, 60) : undefined);
   
   // Use the actual product ID (including variant info) for navigation
   const productDetailId = id;
@@ -239,6 +247,12 @@ export default function ProductCard({
             <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-destructive text-destructive' : ''}`} />
           </Button>
         </div>
+
+        {displayShortDescription && (
+          <p className="text-xs text-muted-foreground line-clamp-1 mb-2" data-testid={`text-short-description-${id}`}>
+            {displayShortDescription}
+          </p>
+        )}
 
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-lg font-bold text-black" data-testid={`text-price-${id}`}>

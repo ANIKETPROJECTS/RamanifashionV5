@@ -504,6 +504,7 @@ export default function Sale() {
                           isNew={product.isNew}
                           isBestseller={product.isBestseller}
                           context="sale"
+                          description={product.description}
                         />
                       </motion.div>
                     );

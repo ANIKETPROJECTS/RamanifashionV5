@@ -511,6 +511,21 @@ export default function ProductDetail() {
             </div>
 
             <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="description">
+                <AccordionTrigger
+                  className="text-lg font-bold text-[#6B4423] dark:text-[#D4A373] hover:no-underline"
+                  data-testid="button-accordion-description"
+                >
+                  PRODUCT DESCRIPTION
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  <p>
+                    {product.description ||
+                      "Beautiful and elegant saree perfect for any occasion."}
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+
               <AccordionItem value="details">
                 <AccordionTrigger
                   className="text-lg font-bold text-[#6B4423] dark:text-[#D4A373] hover:no-underline"
@@ -581,21 +596,6 @@ export default function ProductDetail() {
                       </div>
                     )}
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="description">
-                <AccordionTrigger
-                  className="text-lg font-bold text-[#6B4423] dark:text-[#D4A373] hover:no-underline"
-                  data-testid="button-accordion-description"
-                >
-                  PRODUCT DESCRIPTION
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  <p>
-                    {product.description ||
-                      "Beautiful and elegant saree perfect for any occasion."}
-                  </p>
                 </AccordionContent>
               </AccordionItem>
 

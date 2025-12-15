@@ -498,6 +498,7 @@ export default function TrendingCollection() {
                           isNew={product.isNew}
                           isBestseller={product.isBestseller}
                           context="trending"
+                          description={product.description}
                         />
                       </motion.div>
                     );
