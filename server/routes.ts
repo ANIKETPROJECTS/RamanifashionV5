@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { connectDB } from "./db";
 import { Product, User, Customer, Cart, Wishlist, Order, Address, ContactSubmission, OTP, Review, Settings } from "./models";
@@ -14,11 +14,20 @@ import { sendWhatsAppOTP, generateOTP } from "./whatsapp-service";
 import { phonePeService } from "./phonepe-service";
 import { shiprocketService } from "./shiprocket.service";
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+      admin?: any;
+    }
+  }
+}
+
 const JWT_SECRET = process.env.SESSION_SECRET || "ramani-fashion-secret-key";
 const ADMIN_JWT_SECRET = process.env.ADMIN_SESSION_SECRET || "ramani-admin-secret-key-2024";
 
 // Middleware to verify JWT token
-function authenticateToken(req: any, res: any, next: any) {
+function authenticateToken(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -34,7 +43,7 @@ function authenticateToken(req: any, res: any, next: any) {
 }
 
 // Middleware to verify admin JWT token
-function authenticateAdmin(req: any, res: any, next: any) {
+function authenticateAdmin(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -801,7 +810,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const cartWithColors = {
         ...cart,
-        items: cart.items.map((item: any) => ({
+        items: (cart as any).items.map((item: any) => ({
           ...item,
           selectedColor: item.selectedColor ?? null
         }))
@@ -1258,12 +1267,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const webhookUsername = process.env.PHONEPE_WEBHOOK_USERNAME || '';
       const webhookPassword = process.env.PHONEPE_WEBHOOK_PASSWORD || '';
 
-      const validationResult = phonePeService.validateCallback(
-        authHeader as string,
+      const validationResult = phonePeService.validateCallback({
+        authHeader: authHeader as string,
         responseBody,
         webhookUsername,
         webhookPassword
-      );
+      });
 
       if (!validationResult.isValid) {
         return res.status(401).json({ error: 'Invalid webhook signature' });
