@@ -2502,7 +2502,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/inventory/:id", authenticateAdmin, async (req, res) => {
     try {
-      const { stockQuantity, inStock } = req.body;
+      const { stockQuantity } = req.body;
+      // Automatically set inStock based on stockQuantity
+      const inStock = stockQuantity > 0;
+      
       const product = await Product.findByIdAndUpdate(
         req.params.id,
         { stockQuantity, inStock, updatedAt: new Date() },
