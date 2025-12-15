@@ -43,7 +43,7 @@ export default function HeroCarousel() {
   return (
     <div
       className="relative w-full overflow-hidden"
-      style={{ height: "60vh", maxHeight: "500px", backgroundColor: "#fff" }}
+      style={{ height: "35vh", maxHeight: "300px", backgroundColor: "#fff" }}
     >
       {slides.map((slide, index) => (
         <div
