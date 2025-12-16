@@ -30,6 +30,7 @@ app.use((req, res, next) => {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: https:",
       "font-src 'self' data: https://fonts.gstatic.com",
+      "media-src 'self' data: blob:",
       "connect-src 'self' https://api.phonepe.com https://mercury.phonepe.com https://mercury-t2.phonepe.com https://fonts.googleapis.com wss: https:",
       "worker-src 'self' blob: data: https://mercury-t2.phonepe.com",
       "frame-src https://api.phonepe.com https://mercury.phonepe.com https://mercury-t2.phonepe.com https://www.youtube.com"
