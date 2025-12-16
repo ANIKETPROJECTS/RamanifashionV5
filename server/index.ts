@@ -4,6 +4,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seed";
 import path from "path";
+import fs from "fs";
 
 const app = express();
 
@@ -49,11 +50,54 @@ const isProduction = process.env.NODE_ENV === "production";
 const mediaPath = isProduction 
   ? path.resolve("./dist/public/media")
   : path.resolve("./public/media");
-app.use("/media", express.static(mediaPath));
+
+// Configure MIME types for media files
+const mimeTypes = {
+  ".mp4": "video/mp4",
+  ".webm": "video/webm",
+  ".ogv": "video/ogg",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+};
+
+app.use("/media", (req, res, next) => {
+  const filePath = path.join(mediaPath, req.path);
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeType = mimeTypes[ext as keyof typeof mimeTypes];
+  
+  // Log video requests for debugging
+  if (ext === ".mp4") {
+    console.log(`[Media] Serving ${req.path} from ${filePath}`);
+    try {
+      const stats = fs.statSync(filePath);
+      console.log(`[Media] File size: ${stats.size} bytes`);
+    } catch (e) {
+      console.error(`[Media] Error stat file: ${e}`);
+    }
+  }
+  
+  if (mimeType) {
+    res.setHeader("Content-Type", mimeType);
+  }
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  
+  express.static(mediaPath)(req, res, next);
+});
 
 // Also try the production path as fallback in case files are in different locations
 if (isProduction) {
-  app.use("/media", express.static(path.resolve("./public/media")));
+  app.use("/media", express.static(path.resolve("./public/media"), {
+    setHeaders: (res, filePath) => {
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeType = mimeTypes[ext as keyof typeof mimeTypes];
+      if (mimeType) {
+        res.setHeader("Content-Type", mimeType);
+      }
+      res.setHeader("Cache-Control", "public, max-age=3600");
+    },
+  }));
 }
 
 app.use((req, res, next) => {
