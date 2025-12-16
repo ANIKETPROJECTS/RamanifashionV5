@@ -338,11 +338,20 @@ export default function ProductDetail() {
             </div>
 
             <h1
-              className="text-3xl font-bold mb-4 text-foreground"
+              className="text-3xl font-bold mb-1 text-foreground"
               data-testid="text-product-name"
             >
               {product.name}
             </h1>
+            
+            {product.description && (
+              <p
+                className="text-sm text-muted-foreground mb-4"
+                data-testid="text-product-description-subtext"
+              >
+                {product.description}
+              </p>
+            )}
 
             <div className="flex items-center gap-2 mb-4">
               <div className="flex items-center">
