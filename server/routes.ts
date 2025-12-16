@@ -2143,14 +2143,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         query._id = { $in: paidCustomerIds };
       }
 
-      // Filter by city
+      // Filter by city and/or state using Address collection
+      const addressFilters: any = {};
       if (city && city !== '') {
-        query['address.city'] = new RegExp(city as string, 'i');
+        addressFilters.city = new RegExp(city as string, 'i');
+      }
+      if (state && state !== '') {
+        addressFilters.state = new RegExp(state as string, 'i');
       }
 
-      // Filter by state
-      if (state && state !== '') {
-        query['address.state'] = new RegExp(state as string, 'i');
+      if (Object.keys(addressFilters).length > 0) {
+        // Find all addresses matching the filters
+        const matchingAddresses = await Address.find(addressFilters)
+          .distinct('userId')
+          .lean();
+        
+        // If there are matching addresses, filter customers by those userIds
+        if (matchingAddresses && matchingAddresses.length > 0) {
+          query._id = { $in: matchingAddresses };
+        } else {
+          // No matching addresses, return empty result
+          query._id = { $in: [] };
+        }
       }
 
       // Filter by last activity (lastLogin within N days)
