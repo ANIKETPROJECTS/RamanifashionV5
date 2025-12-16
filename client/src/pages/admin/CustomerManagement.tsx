@@ -296,15 +296,15 @@ export default function CustomerManagement() {
               <div className="text-sm font-medium">Advanced Filters</div>
               <div className="flex flex-wrap gap-4">
                 <div className="flex-1 min-w-[150px]">
-                  <Select value={filterCity} onValueChange={(value) => {
-                    setFilterCity(value);
+                  <Select value={filterCity || "all"} onValueChange={(value) => {
+                    setFilterCity(value === "all" ? "" : value);
                     setPage(1);
                   }}>
                     <SelectTrigger data-testid="select-filter-city">
                       <SelectValue placeholder="Filter by city..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Cities</SelectItem>
+                      <SelectItem value="all">All Cities</SelectItem>
                       {uniqueCities.map((city) => (
                         <SelectItem key={city} value={city}>
                           {city}
@@ -315,15 +315,15 @@ export default function CustomerManagement() {
                 </div>
 
                 <div className="flex-1 min-w-[150px]">
-                  <Select value={filterState} onValueChange={(value) => {
-                    setFilterState(value);
+                  <Select value={filterState || "all"} onValueChange={(value) => {
+                    setFilterState(value === "all" ? "" : value);
                     setPage(1);
                   }}>
                     <SelectTrigger data-testid="select-filter-state">
                       <SelectValue placeholder="Filter by state..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All States</SelectItem>
+                      <SelectItem value="all">All States</SelectItem>
                       {uniqueStates.map((state) => (
                         <SelectItem key={state} value={state}>
                           {state}
