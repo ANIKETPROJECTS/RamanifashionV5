@@ -221,12 +221,21 @@ export default function Cart() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => updateQuantityMutation.mutate({
-                              productId: item.productId._id,
-                              quantity: Math.max(1, item.quantity - 1),
-                              selectedColor: item.selectedColor
-                            })}
-                            disabled={updateQuantityMutation.isPending}
+                            onClick={() => {
+                              if (item.quantity <= 1) {
+                                removeItemMutation.mutate({
+                                  productId: item.productId._id,
+                                  selectedColor: item.selectedColor
+                                });
+                              } else {
+                                updateQuantityMutation.mutate({
+                                  productId: item.productId._id,
+                                  quantity: item.quantity - 1,
+                                  selectedColor: item.selectedColor
+                                });
+                              }
+                            }}
+                            disabled={updateQuantityMutation.isPending || removeItemMutation.isPending}
                             data-testid={`button-decrease-${item.productId?._id}`}
                           >
                             -
