@@ -81,6 +81,9 @@ app.use("/media", (req, res, next) => {
   if (mimeType) {
     res.setHeader("Content-Type", mimeType);
   }
+  
+  // Enable Range requests for video streaming
+  res.setHeader("Accept-Ranges", "bytes");
   res.setHeader("Cache-Control", "public, max-age=3600");
   
   express.static(mediaPath)(req, res, next);
@@ -95,6 +98,7 @@ if (isProduction) {
       if (mimeType) {
         res.setHeader("Content-Type", mimeType);
       }
+      res.setHeader("Accept-Ranges", "bytes");
       res.setHeader("Cache-Control", "public, max-age=3600");
     },
   }));
