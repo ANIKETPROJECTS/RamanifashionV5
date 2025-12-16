@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ShoppingBag, Star, Zap } from "lucide-react";
+import { Heart, ShoppingBag, Star, CreditCard } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
@@ -226,27 +226,16 @@ export default function ProductCard({
             onClick={handleBuyNow}
             data-testid={`button-buy-now-${id}`}
           >
-            <Zap className="h-4 w-4 mr-2" />
+            <CreditCard className="h-4 w-4 mr-2" />
             Buy Now
           </Button>
         </div>
       </div>
 
       <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-medium text-sm line-clamp-2 flex-1" data-testid={`text-product-name-${id}`}>
-            {name}
-          </h3>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 flex-shrink-0 -mt-1"
-            onClick={handleWishlist}
-            data-testid={`button-wishlist-text-${id}`}
-          >
-            <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-destructive text-destructive' : ''}`} />
-          </Button>
-        </div>
+        <h3 className="font-medium text-sm line-clamp-2 mb-2" data-testid={`text-product-name-${id}`}>
+          {name}
+        </h3>
 
         {displayShortDescription && (
           <p className="text-xs text-muted-foreground line-clamp-1 mb-2" data-testid={`text-short-description-${id}`}>
