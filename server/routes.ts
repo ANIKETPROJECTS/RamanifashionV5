@@ -1081,6 +1081,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await order.save();
 
+      // Update customer profile with shipping address
+      if (req.body.shippingAddress) {
+        const { address, locality, city, state, pincode } = req.body.shippingAddress;
+        await Customer.findByIdAndUpdate(
+          (req as any).user.userId,
+          {
+            address: {
+              street: address && locality ? `${address}, ${locality}` : address || locality,
+              city: city || '',
+              state: state || '',
+              pincode: pincode || '',
+              landmark: locality || ''
+            }
+          },
+          { new: true }
+        );
+      }
+
       // Clear cart after order
       await Cart.findOneAndUpdate(
         { userId: (req as any).user.userId },
