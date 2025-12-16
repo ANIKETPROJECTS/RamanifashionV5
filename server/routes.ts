@@ -2196,6 +2196,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             })
             .lean();
           
+          // Get saved addresses for this customer (prioritize default address)
+          const savedAddresses = await Address.find({ userId: customer._id })
+            .sort({ isDefault: -1, createdAt: -1 })
+            .lean();
+          
+          // Use saved address if available, otherwise use embedded address
+          let displayAddress = customer.address;
+          if (savedAddresses && savedAddresses.length > 0) {
+            const primaryAddress = savedAddresses[0];
+            displayAddress = {
+              street: primaryAddress.address,
+              city: primaryAddress.city,
+              state: primaryAddress.state,
+              pincode: primaryAddress.pincode,
+              landmark: primaryAddress.locality
+            };
+          }
+          
           // Calculate stats
           const totalOrders = orders.length;
           const totalSpent = orders.reduce((sum, order) => sum + (order.total || 0), 0);
@@ -2209,7 +2227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             name: customer.name || '',
             email: customer.email || '',
             dob: customer.dob,
-            address: customer.address,
+            address: displayAddress,
             phoneVerified: customer.phoneVerified,
             notifyUpdates: customer.notifyUpdates,
             lastLogin: customer.lastLogin,
