@@ -912,7 +912,7 @@ export default function OrderManagement() {
                       <Button
                         variant="outline"
                         onClick={() => sendToShiprocketMutation.mutate(selectedOrder._id)}
-                        disabled={sendToShiprocketMutation.isPending || !selectedOrder.approved}
+                        disabled={sendToShiprocketMutation.isPending}
                         className="flex-1 min-w-[160px]"
                         data-testid="button-send-shiprocket"
                       >
