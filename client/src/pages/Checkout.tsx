@@ -96,6 +96,7 @@ export default function Checkout() {
   });
 
   const initiatePhonePePayment = (orderId: string, amount: number) => {
+    console.log('[CHECKOUT] Initiating PhonePe payment - orderId:', orderId, 'amount:', amount);
     phonePePaymentMutation.mutate({ orderId, amount });
   };
 

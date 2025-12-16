@@ -1155,18 +1155,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/payment/phonepe/status/:merchantOrderId", authenticateToken, async (req, res) => {
     try {
       const { merchantOrderId } = req.params;
+      console.log('[STATUS CHECK] Fetching status for merchantOrderId:', merchantOrderId);
 
       const order = await Order.findOne({ phonePeMerchantOrderId: merchantOrderId });
       
       if (!order) {
+        console.warn('[STATUS CHECK] Order not found for merchantOrderId:', merchantOrderId);
         return res.status(404).json({ error: 'Order not found' });
       }
 
+      console.log('[STATUS CHECK] Found order:', order._id, 'Current paymentStatus:', order.paymentStatus, 'phonePePaymentState:', order.phonePePaymentState);
+
       if (order.userId.toString() !== (req as any).user.userId) {
+        console.warn('[STATUS CHECK] Unauthorized access attempt to order:', order._id);
         return res.status(403).json({ error: 'Unauthorized access to order' });
       }
 
       if (order.phonePePaymentState && (order.phonePePaymentState === 'COMPLETED' || order.phonePePaymentState === 'FAILED')) {
+        console.log('[STATUS CHECK] Returning cached status - already COMPLETED or FAILED:', order.phonePePaymentState);
         return res.json({
           success: true,
           state: order.phonePePaymentState,
@@ -1177,19 +1183,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       try {
+        console.log('[STATUS CHECK] Checking status from PhonePe API');
         const statusResponse = await phonePeService.checkOrderStatus(merchantOrderId);
 
         if (statusResponse.success) {
           const paymentStatus = statusResponse.state === 'COMPLETED' ? 'paid' : 
                                statusResponse.state === 'FAILED' ? 'failed' : 'pending';
           
-          await Order.findByIdAndUpdate(order._id, {
+          console.log('[STATUS CHECK] PhonePe API response:', statusResponse.state, 'mapping to paymentStatus:', paymentStatus);
+          
+          const updatedOrder = await Order.findByIdAndUpdate(order._id, {
             phonePePaymentState: statusResponse.state,
             phonePePaymentDetails: statusResponse.paymentDetails,
             paymentStatus,
             orderStatus: paymentStatus === 'paid' ? 'processing' : order.orderStatus,
             updatedAt: new Date(),
-          });
+          }, { new: true });
+
+          console.log('[STATUS CHECK] Order updated successfully:', updatedOrder?.paymentStatus);
 
           return res.json({
             success: true,
@@ -1200,9 +1211,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       } catch (phonePeError) {
-        console.error('PhonePe SDK error:', phonePeError);
+        console.error('[STATUS CHECK] PhonePe SDK error:', phonePeError);
       }
 
+      console.log('[STATUS CHECK] Returning current order status:', order.phonePePaymentState);
       return res.json({
         success: true,
         state: order.phonePePaymentState || 'PENDING',
@@ -1211,7 +1223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentDetails: order.phonePePaymentDetails || {},
       });
     } catch (error: any) {
-      console.error('PhonePe status check error:', error);
+      console.error('[STATUS CHECK] Error:', error);
       res.status(500).json({ error: error.message || 'Failed to check payment status' });
     }
   });
@@ -1226,7 +1238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let merchantOrderId = null;
       let paymentStatus = 'PENDING';
 
-      console.log('Payment callback received - body:', req.body, 'query:', req.query);
+      console.log('[PAYMENT CALLBACK] Received - body:', JSON.stringify(req.body), 'query:', JSON.stringify(req.query));
 
       // Try to parse the response
       if (base64Response || responseFromQuery) {
@@ -1236,12 +1248,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const paymentData = JSON.parse(decodedResponse);
           merchantOrderId = paymentData.merchantOrderId || paymentData.merchantTransactionId;
           paymentStatus = paymentData.state || 'PENDING';
-          console.log('PhonePe callback parsed - Order ID:', merchantOrderId, 'Status:', paymentStatus);
+          console.log('[PAYMENT CALLBACK PARSED] Order ID:', merchantOrderId, 'Status:', paymentStatus, 'Full data:', JSON.stringify(paymentData));
         } catch (parseError) {
-          console.error('Error parsing PhonePe response:', parseError);
+          console.error('[PAYMENT CALLBACK ERROR] Failed to parse response:', parseError);
           // If we can't parse, just redirect to orders
           paymentStatus = 'PENDING';
         }
+      } else {
+        console.warn('[PAYMENT CALLBACK WARNING] No base64 response found in request');
       }
 
       // Update order in database with final payment status
@@ -1249,7 +1263,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const dbPaymentStatus = paymentStatus === 'COMPLETED' ? 'paid' : 
                               paymentStatus === 'FAILED' ? 'failed' : 'pending';
         try {
-          await Order.findOneAndUpdate(
+          console.log('[PAYMENT UPDATE] Attempting to update order with merchantOrderId:', merchantOrderId, 'to status:', dbPaymentStatus);
+          const updatedOrder = await Order.findOneAndUpdate(
             { phonePeMerchantOrderId: merchantOrderId },
             {
               phonePePaymentState: paymentStatus,
@@ -1259,19 +1274,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
             },
             { new: true }
           );
-          console.log('Updated order payment status to:', dbPaymentStatus);
+          console.log('[PAYMENT UPDATE SUCCESS] Updated order:', JSON.stringify(updatedOrder));
         } catch (dbError: any) {
-          console.error('Error updating order payment status:', dbError.message);
+          console.error('[PAYMENT UPDATE ERROR] Failed to update order:', dbError.message);
         }
+      } else {
+        console.warn('[PAYMENT CALLBACK WARNING] No merchantOrderId found, skipping database update');
       }
 
       // Find the frontend base URL (use HOST_URL)
       const frontendUrl = process.env.HOST_URL || 'https://ramanifashion.in';
 
       // Redirect to /orders after successful payment
+      console.log('[PAYMENT REDIRECT] Redirecting to orders with status:', paymentStatus);
       return res.redirect(`${frontendUrl}/orders?paymentStatus=${paymentStatus}&merchantOrderId=${merchantOrderId}`);
     } catch (error: any) {
-      console.error('Payment callback error:', error);
+      console.error('[PAYMENT CALLBACK FATAL ERROR]', error);
       const frontendUrl = process.env.HOST_URL || 'https://ramanifashion.in';
       res.redirect(`${frontendUrl}/orders?paymentStatus=error`);
     }
@@ -1282,6 +1300,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/payment/phonepe/webhook", async (req, res) => {
     try {
+      console.log('[WEBHOOK] Received - body:', JSON.stringify(req.body));
+      
       const authHeader = req.headers['authorization'];
       const responseBody = JSON.stringify(req.body);
 
@@ -1296,31 +1316,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!validationResult.isValid) {
+        console.warn('[WEBHOOK] Invalid webhook signature');
         return res.status(401).json({ error: 'Invalid webhook signature' });
       }
 
       const callbackData = validationResult.data;
+      console.log('[WEBHOOK] Validated data:', JSON.stringify(callbackData));
       
       if (callbackData && callbackData.merchantOrderId) {
         const order = await Order.findOne({ phonePeMerchantOrderId: callbackData.merchantOrderId });
+        console.log('[WEBHOOK] Found order:', order?._id, 'for merchantOrderId:', callbackData.merchantOrderId);
+        
         if (order) {
           const paymentStatus = callbackData.state === 'COMPLETED' ? 'paid' :
                                callbackData.state === 'FAILED' ? 'failed' : 'pending';
           
-          await Order.findByIdAndUpdate(order._id, {
+          console.log('[WEBHOOK] Updating order with state:', callbackData.state, 'mapped to paymentStatus:', paymentStatus);
+          
+          const updatedOrder = await Order.findByIdAndUpdate(order._id, {
             phonePePaymentState: callbackData.state,
             phonePeTransactionId: callbackData.transactionId,
             phonePePaymentDetails: callbackData.paymentDetails,
             paymentStatus,
             orderStatus: paymentStatus === 'paid' ? 'processing' : order.orderStatus,
             updatedAt: new Date(),
-          });
+          }, { new: true });
+          
+          console.log('[WEBHOOK] Order updated successfully - new paymentStatus:', updatedOrder?.paymentStatus);
         }
+      } else {
+        console.warn('[WEBHOOK] No merchantOrderId found in callback data');
       }
 
       res.json({ success: true });
     } catch (error: any) {
-      console.error('PhonePe webhook error:', error);
+      console.error('[WEBHOOK] Error:', error);
       res.status(500).json({ error: error.message || 'Webhook processing failed' });
     }
   });

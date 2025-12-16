@@ -19,6 +19,9 @@ export default function Orders() {
     queryKey: ["/api/orders"],
   });
 
+  // Log orders on load and when they update
+  console.log('[ORDERS PAGE] Loaded - isLoading:', isLoading, 'Orders:', orders, 'Error:', error);
+
   const isUnauthorized = isError && error && String(error).includes("401:");
 
   const getPaymentStatusColor = (status: string) => {
