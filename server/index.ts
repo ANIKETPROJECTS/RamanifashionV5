@@ -44,7 +44,17 @@ app.use("/attached_assets", express.static(path.resolve("./attached_assets")));
 app.use("/uploads", express.static(path.resolve("./uploads")));
 
 // Serve static files from media directory (admin uploads)
-app.use("/media", express.static(path.resolve("./public/media")));
+// In production, Vite copies public/ to dist/public/, so we need to serve from both locations
+const isProduction = process.env.NODE_ENV === "production";
+const mediaPath = isProduction 
+  ? path.resolve("./dist/public/media")
+  : path.resolve("./public/media");
+app.use("/media", express.static(mediaPath));
+
+// Also try the production path as fallback in case files are in different locations
+if (isProduction) {
+  app.use("/media", express.static(path.resolve("./public/media")));
+}
 
 app.use((req, res, next) => {
   const start = Date.now();
