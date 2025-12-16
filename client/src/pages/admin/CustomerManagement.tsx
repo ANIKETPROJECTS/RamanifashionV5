@@ -549,20 +549,22 @@ export default function CustomerManagement() {
                     <CardTitle className="text-lg">Address</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {selectedCustomer.address && (
-                      Object.values(selectedCustomer.address).some(v => v) ? (
-                        <div className="space-y-2 text-sm">
-                          {selectedCustomer.address.street && <div>{selectedCustomer.address.street}</div>}
-                          {selectedCustomer.address.landmark && <div>{selectedCustomer.address.landmark}</div>}
-                          {selectedCustomer.address.city && selectedCustomer.address.state && (
-                            <div>{selectedCustomer.address.city}, {selectedCustomer.address.state}</div>
-                          )}
-                          {selectedCustomer.address.pincode && <div>PIN: {selectedCustomer.address.pincode}</div>}
-                        </div>
-                      ) : (
-                        <div className="italic text-muted-foreground">No address provided</div>
-                      )
-                    ) || <div className="italic text-muted-foreground">No address provided</div>}
+                    {selectedCustomer.address && (selectedCustomer.address.street || selectedCustomer.address.city || selectedCustomer.address.state || selectedCustomer.address.pincode || selectedCustomer.address.landmark) ? (
+                      <div className="space-y-2 text-sm">
+                        {selectedCustomer.address.street && <div>{selectedCustomer.address.street}</div>}
+                        {selectedCustomer.address.landmark && <div>{selectedCustomer.address.landmark}</div>}
+                        {(selectedCustomer.address.city || selectedCustomer.address.state) && (
+                          <div>
+                            {selectedCustomer.address.city}
+                            {selectedCustomer.address.city && selectedCustomer.address.state && ', '}
+                            {selectedCustomer.address.state}
+                          </div>
+                        )}
+                        {selectedCustomer.address.pincode && <div>PIN: {selectedCustomer.address.pincode}</div>}
+                      </div>
+                    ) : (
+                      <div className="italic text-muted-foreground">No address provided</div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
