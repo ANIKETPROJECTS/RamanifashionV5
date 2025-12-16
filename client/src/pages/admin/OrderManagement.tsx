@@ -143,17 +143,17 @@ export default function OrderManagement() {
 
   const approveOrderMutation = useMutation({
     mutationFn: (orderId: string) => {
-      console.log('\n🚀 APPROVING ORDER');
+      console.log('\n🚀 APPROVING ORDER (ONLY)');
       console.log('Order ID:', orderId);
       console.log('Timestamp:', new Date().toISOString());
-      return apiRequest(`/api/admin/orders/${orderId}/approve`, "POST");
+      return apiRequest(`/api/admin/orders/${orderId}/approve-only`, "POST");
     },
     onSuccess: (data) => {
       console.log('✅ Order approved successfully!', data);
       queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
       toast({ 
-        title: "Order approved successfully!", 
-        description: "Order has been sent to Shiprocket for processing." 
+        title: "Order approved!", 
+        description: "You can now send it to a shipping partner." 
       });
       setDetailDialogOpen(false);
       setSelectedOrder(null);
@@ -162,6 +162,30 @@ export default function OrderManagement() {
       console.error('❌ Order approval failed:', error);
       console.error('Error message:', error.message);
       console.error('Full error:', JSON.stringify(error, null, 2));
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const sendToShiprocketMutation = useMutation({
+    mutationFn: (orderId: string) => {
+      console.log('\n📦 SENDING TO SHIPROCKET');
+      console.log('Order ID:', orderId);
+      console.log('Timestamp:', new Date().toISOString());
+      return apiRequest(`/api/admin/orders/${orderId}/send-to-shiprocket`, "POST");
+    },
+    onSuccess: (data) => {
+      console.log('✅ Order sent to Shiprocket!', data);
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+      toast({ 
+        title: "Sent to Shiprocket!", 
+        description: "Order is now in Shiprocket processing." 
+      });
+      setDetailDialogOpen(false);
+      setSelectedOrder(null);
+    },
+    onError: (error: any) => {
+      console.error('❌ Sending to Shiprocket failed:', error);
+      console.error('Error message:', error.message);
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   });
@@ -875,21 +899,31 @@ export default function OrderManagement() {
                       </div>
                     )}
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Button
                         onClick={() => approveOrderMutation.mutate(selectedOrder._id)}
                         disabled={approveOrderMutation.isPending || (selectedOrder.paymentMethod !== 'cod' && selectedOrder.paymentStatus !== 'paid')}
-                        className="flex-1"
+                        className="flex-1 min-w-[120px]"
                         data-testid="button-approve-order"
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
-                        {approveOrderMutation.isPending ? 'Approving...' : 'Approve & Send to Shiprocket'}
+                        {approveOrderMutation.isPending ? 'Approving...' : 'Approve'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => sendToShiprocketMutation.mutate(selectedOrder._id)}
+                        disabled={sendToShiprocketMutation.isPending || !selectedOrder.approved}
+                        className="flex-1 min-w-[160px]"
+                        data-testid="button-send-shiprocket"
+                      >
+                        <Truck className="h-4 w-4 mr-2" />
+                        {sendToShiprocketMutation.isPending ? 'Sending...' : 'Send to Ship Rocket'}
                       </Button>
                       <Button
                         variant="destructive"
                         onClick={() => setShowRejectionInput(!showRejectionInput)}
                         disabled={rejectOrderMutation.isPending}
-                        className="flex-1"
+                        className="flex-1 min-w-[120px]"
                         data-testid="button-reject-order"
                       >
                         <XCircle className="h-4 w-4 mr-2" />
@@ -918,6 +952,24 @@ export default function OrderManagement() {
                         </Button>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {selectedOrder.approved && !selectedOrder.shiprocketOrderId && (selectedOrder.orderStatus === 'pending' || selectedOrder.orderStatus === 'approved') && (
+                  <div className="space-y-3 pt-4 border-t">
+                    <div className="text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950 p-3 rounded-md">
+                      Order is approved. You can now send it to a shipping partner.
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() => sendToShiprocketMutation.mutate(selectedOrder._id)}
+                      disabled={sendToShiprocketMutation.isPending}
+                      className="w-full"
+                      data-testid="button-send-shiprocket-approved"
+                    >
+                      <Truck className="h-4 w-4 mr-2" />
+                      {sendToShiprocketMutation.isPending ? 'Sending...' : 'Send to Ship Rocket'}
+                    </Button>
                   </div>
                 )}
               </div>

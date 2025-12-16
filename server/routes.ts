@@ -2337,6 +2337,193 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/admin/orders/:id/approve-only", authenticateAdmin, async (req, res) => {
+    console.log('\n=== ORDER APPROVAL ONLY STARTED ===');
+    console.log('Order ID:', req.params.id);
+    console.log('Admin:', req.admin.username);
+    console.log('Timestamp:', new Date().toISOString());
+    
+    try {
+      const order = await Order.findById(req.params.id).populate('userId', 'name email phone');
+      
+      if (!order) {
+        console.error('❌ Order not found:', req.params.id);
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      if (order.approved) {
+        console.error('❌ Order already approved');
+        return res.status(400).json({ error: 'Order already approved' });
+      }
+
+      if (order.paymentMethod !== 'cod' && order.paymentStatus !== 'paid') {
+        console.error('❌ Payment not completed. Payment status:', order.paymentStatus);
+        return res.status(400).json({ error: 'Prepaid orders must have payment completed before approval' });
+      }
+
+      order.approved = true;
+      order.approvedBy = req.admin.username;
+      order.approvedAt = new Date();
+      order.orderStatus = 'approved';
+      order.updatedAt = new Date();
+      
+      await order.save();
+
+      console.log(`\n✅ Order ${order.orderNumber} approved (waiting for shipping partner)`);
+      console.log('=== ORDER APPROVAL COMPLETED ===\n');
+
+      const populatedOrder = await Order.findById(order._id)
+        .populate('userId', 'name email phone')
+        .lean();
+
+      res.json(populatedOrder);
+    } catch (error: any) {
+      console.error('\n❌ ORDER APPROVAL FAILED ===');
+      console.error('Error:', error.message);
+      console.error('Stack:', error.stack);
+      console.error('=== END ERROR ===\n');
+      res.status(500).json({ error: error.message || 'Failed to approve order' });
+    }
+  });
+
+  app.post("/api/admin/orders/:id/send-to-shiprocket", authenticateAdmin, async (req, res) => {
+    console.log('\n=== SENDING TO SHIPROCKET STARTED ===');
+    console.log('Order ID:', req.params.id);
+    console.log('Admin:', req.admin.username);
+    console.log('Timestamp:', new Date().toISOString());
+    
+    try {
+      const order = await Order.findById(req.params.id).populate('userId', 'name email phone');
+      
+      if (!order) {
+        console.error('❌ Order not found:', req.params.id);
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      if (!order.approved) {
+        console.error('❌ Order is not approved');
+        return res.status(400).json({ error: 'Order must be approved first' });
+      }
+
+      if (order.shiprocketOrderId) {
+        console.error('❌ Order already sent to Shiprocket');
+        return res.status(400).json({ error: 'Order already sent to Shiprocket' });
+      }
+
+      const nameParts = order.shippingAddress.fullName.split(' ');
+      const firstName = nameParts[0] || 'Customer';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const orderItems = order.items.map((item: any, index: number) => ({
+        name: item.name,
+        sku: `SKU-${item.productId || index}`,
+        units: item.quantity,
+        selling_price: item.price,
+        discount: 0,
+        tax: 0,
+        hsn: 5208
+      }));
+
+      const totalWeight = order.items.reduce((sum: number, item: any) => sum + (item.quantity * 0.5), 0);
+
+      const now = new Date();
+      const orderDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      const shiprocketOrderData = {
+        order_id: order.orderNumber,
+        order_date: orderDate,
+        pickup_location: "Primary",
+        billing_customer_name: firstName,
+        billing_last_name: lastName,
+        billing_address: order.shippingAddress.address,
+        billing_city: order.shippingAddress.city,
+        billing_pincode: order.shippingAddress.pincode,
+        billing_state: order.shippingAddress.state,
+        billing_country: "India",
+        billing_email: (order.userId as any).email || "customer@ramanifashion.com",
+        billing_phone: order.shippingAddress.phone,
+        shipping_is_billing: true,
+        order_items: orderItems,
+        payment_method: order.paymentMethod === 'cod' ? 'COD' : 'Prepaid',
+        sub_total: order.subtotal,
+        length: 30,
+        breadth: 25,
+        height: 10,
+        weight: totalWeight
+      };
+
+      console.log('\n📦 Sending order to Shiprocket:');
+      console.log('Order Number:', shiprocketOrderData.order_id);
+      console.log('Customer:', firstName, lastName);
+      console.log('City:', shiprocketOrderData.billing_city);
+      console.log('Pincode:', shiprocketOrderData.billing_pincode);
+      console.log('Items:', orderItems.length);
+      console.log('Payment Method:', shiprocketOrderData.payment_method);
+      console.log('Weight:', totalWeight, 'kg');
+
+      const shiprocketResponse = await shiprocketService.createOrder(shiprocketOrderData);
+      
+      console.log('\n✅ Shiprocket Response:');
+      console.log('Order ID:', shiprocketResponse.order_id);
+      console.log('Shipment ID:', shiprocketResponse.shipment_id);
+      console.log('Status:', shiprocketResponse.status);
+
+      order.orderStatus = 'processing';
+      order.shiprocketOrderId = shiprocketResponse.order_id;
+      order.shiprocketShipmentId = shiprocketResponse.shipment_id;
+      order.updatedAt = new Date();
+      
+      await order.save();
+
+      if (shiprocketResponse.shipment_id) {
+        try {
+          const awbResponse = await shiprocketService.assignAWB(shiprocketResponse.shipment_id);
+          
+          if (awbResponse.response?.data?.awb_code) {
+            order.shiprocketAwbCode = awbResponse.response.data.awb_code;
+            order.shiprocketCourierId = awbResponse.response.data.courier_company_id;
+            order.shiprocketCourierName = awbResponse.response.data.courier_name;
+            await order.save();
+
+            try {
+              await shiprocketService.schedulePickup(shiprocketResponse.shipment_id);
+              console.log(`✅ Pickup scheduled for order ${order.orderNumber}`);
+            } catch (pickupError: any) {
+              console.error('Pickup scheduling failed (non-critical):', pickupError.message);
+            }
+          }
+        } catch (awbError: any) {
+          console.error('AWB assignment failed (non-critical):', awbError.message);
+        }
+      }
+
+      console.log(`\n✅ Order ${order.orderNumber} sent to Shiprocket`);
+      console.log('=== SENDING TO SHIPROCKET COMPLETED ===\n');
+
+      // Send order confirmation notification to customer
+      try {
+        const customerPhone = order.shippingAddress.phone;
+        const customerName = order.shippingAddress.fullName.split(' ')[0] || 'Customer';
+        await sendOrderConfirmation(customerPhone, order.orderNumber, customerName);
+        console.log('✅ Order confirmation sent to customer:', customerPhone);
+      } catch (notificationError: any) {
+        console.error('⚠️ Failed to send order confirmation:', notificationError.message);
+      }
+
+      const populatedOrder = await Order.findById(order._id)
+        .populate('userId', 'name email phone')
+        .lean();
+
+      res.json(populatedOrder);
+    } catch (error: any) {
+      console.error('\n❌ SENDING TO SHIPROCKET FAILED ===');
+      console.error('Error:', error.message);
+      console.error('Stack:', error.stack);
+      console.error('=== END ERROR ===\n');
+      res.status(500).json({ error: error.message || 'Failed to send to Shiprocket' });
+    }
+  });
+
   app.post("/api/admin/orders/:id/approve", authenticateAdmin, async (req, res) => {
     console.log('\n=== ORDER APPROVAL STARTED ===');
     console.log('Order ID:', req.params.id);
