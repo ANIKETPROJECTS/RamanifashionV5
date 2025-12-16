@@ -113,6 +113,10 @@ export default function OrderManagement() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
+  // Image preview dialog
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewImageOpen, setPreviewImageOpen] = useState(false);
+
   // Rejection reason state (shown inline)
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectionInput, setShowRejectionInput] = useState(false);
@@ -553,10 +557,16 @@ export default function OrderManagement() {
                           <img 
                             src={order.items[0].image} 
                             alt={order.items[0].name}
-                            className="h-12 w-12 object-cover rounded-md"
+                            className="h-20 w-20 object-cover rounded-md cursor-pointer hover-elevate"
+                            onClick={() => {
+                              if (order.items[0]?.image) {
+                                setPreviewImage(order.items[0].image);
+                                setPreviewImageOpen(true);
+                              }
+                            }}
                           />
                         ) : (
-                          <div className="h-12 w-12 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                          <div className="h-20 w-20 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
                             No image
                           </div>
                         )}
@@ -988,6 +998,25 @@ export default function OrderManagement() {
                 )}
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Image Preview Dialog */}
+        <Dialog open={previewImageOpen} onOpenChange={setPreviewImageOpen}>
+          <DialogContent className="max-w-2xl" data-testid="dialog-image-preview">
+            <DialogHeader>
+              <DialogTitle>Product Image</DialogTitle>
+            </DialogHeader>
+            <div className="flex justify-center">
+              {previewImage && (
+                <img 
+                  src={previewImage} 
+                  alt="Product preview"
+                  className="max-h-[500px] max-w-full object-contain rounded-md"
+                  data-testid="img-preview"
+                />
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       </div>
