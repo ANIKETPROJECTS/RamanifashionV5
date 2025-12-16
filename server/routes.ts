@@ -2450,14 +2450,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Order not found' });
       }
 
-      if (!order.approved) {
-        console.error('❌ Order is not approved');
-        return res.status(400).json({ error: 'Order must be approved first' });
-      }
-
       if (order.shiprocketOrderId) {
         console.error('❌ Order already sent to Shiprocket');
         return res.status(400).json({ error: 'Order already sent to Shiprocket' });
+      }
+
+      // Auto-approve the order if not already approved
+      if (!order.approved) {
+        order.approved = true;
+        order.approvedBy = req.admin.username;
+        order.approvedAt = new Date();
+        order.orderStatus = 'approved';
+        console.log('✅ Auto-approving order before sending to ShipRocket');
       }
 
       const nameParts = order.shippingAddress.fullName.split(' ');
