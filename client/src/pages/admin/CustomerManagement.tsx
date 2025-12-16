@@ -127,19 +127,31 @@ export default function CustomerManagement() {
   const customers = customersData?.customers || [];
   const pagination = customersData?.pagination;
 
+  // Helper function to get unique values case-insensitively
+  const getUniqueCaseInsensitive = (values: string[]): string[] => {
+    const seenLower = new Map<string, string>();
+    values.forEach(value => {
+      const lowerValue = value.toLowerCase();
+      if (!seenLower.has(lowerValue)) {
+        seenLower.set(lowerValue, value);
+      }
+    });
+    return Array.from(seenLower.values()).sort();
+  };
+
   // Extract unique cities and states from customer addresses
   const { uniqueCities, uniqueStates } = useMemo(() => {
-    const cities = new Set<string>();
-    const states = new Set<string>();
+    const cities: string[] = [];
+    const states: string[] = [];
     
     customers.forEach(customer => {
-      if (customer.address?.city) cities.add(customer.address.city);
-      if (customer.address?.state) states.add(customer.address.state);
+      if (customer.address?.city) cities.push(customer.address.city);
+      if (customer.address?.state) states.push(customer.address.state);
     });
     
     return {
-      uniqueCities: Array.from(cities).sort(),
-      uniqueStates: Array.from(states).sort(),
+      uniqueCities: getUniqueCaseInsensitive(cities),
+      uniqueStates: getUniqueCaseInsensitive(states),
     };
   }, [customers]);
 
