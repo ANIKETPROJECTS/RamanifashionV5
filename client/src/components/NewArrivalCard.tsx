@@ -132,15 +132,15 @@ export default function NewArrivalCard({
           onMouseLeave={() => setCurrentImage(image)}
         />
         
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 bg-white/80 hover:bg-white"
-          onClick={handleWishlist}
-          data-testid={`button-wishlist-${id}`}
-        >
-          <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-destructive text-destructive' : ''}`} />
-        </Button>
+        <div className={`absolute top-2 right-2 z-20 rounded-full p-1.5 flex items-center justify-center ${isWishlisted ? 'bg-destructive' : 'bg-white'}`}>
+          <button
+            onClick={handleWishlist}
+            data-testid={`button-wishlist-${id}`}
+            className="focus:outline-none"
+          >
+            <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-white text-white' : 'text-black'}`} />
+          </button>
+        </div>
         
         <Badge 
           className="absolute top-2 left-2 rounded-full bg-amber-800 text-white px-3 py-1 text-xs font-medium"
