@@ -56,56 +56,53 @@ const mimeTypes: Record<string, string> = {
   ".gif": "image/gif",
 };
 
-// Setup media serving with proper MIME types and debugging
-const setupMediaRoute = () => {
-  const primaryPath = path.resolve("./public/media");
-  const secondaryPath = path.resolve("./dist/public/media");
-  
-  // Check which paths exist
-  const primaryExists = fs.existsSync(primaryPath);
-  const secondaryExists = fs.existsSync(secondaryPath);
-  
-  console.log(`[Media] Primary path (./public/media): ${primaryExists ? 'EXISTS' : 'MISSING'}`);
-  console.log(`[Media] Secondary path (./dist/public/media): ${secondaryExists ? 'EXISTS' : 'MISSING'}`);
-  
-  // Try primary path first
-  if (primaryExists) {
-    app.use("/media", express.static(primaryPath, {
-      setHeaders: (res, filePath) => {
-        const ext = path.extname(filePath).toLowerCase();
-        const mimeType = mimeTypes[ext];
-        if (ext === ".mp4") {
-          console.log(`[Media] Serving from primary: ${filePath}`);
-        }
-        if (mimeType) {
-          res.setHeader("Content-Type", mimeType);
-        }
-        res.setHeader("Accept-Ranges", "bytes");
-        res.setHeader("Cache-Control", "public, max-age=3600");
-      },
-    }));
-  }
-  
-  // Add secondary path as fallback in production
-  if (secondaryExists && process.env.NODE_ENV === "production") {
-    app.use("/media", express.static(secondaryPath, {
-      setHeaders: (res, filePath) => {
-        const ext = path.extname(filePath).toLowerCase();
-        const mimeType = mimeTypes[ext];
-        if (ext === ".mp4") {
-          console.log(`[Media] Serving from secondary: ${filePath}`);
-        }
-        if (mimeType) {
-          res.setHeader("Content-Type", mimeType);
-        }
-        res.setHeader("Accept-Ranges", "bytes");
-        res.setHeader("Cache-Control", "public, max-age=3600");
-      },
-    }));
-  }
-};
+// Setup media serving - ALWAYS register, even if directory is missing
+const primaryPath = path.resolve("./public/media");
+const secondaryPath = path.resolve("./dist/public/media");
 
-setupMediaRoute();
+// Check which paths exist (for logging purposes)
+const primaryExists = fs.existsSync(primaryPath);
+const secondaryExists = fs.existsSync(secondaryPath);
+
+console.log(`[Media] Primary path (./public/media): ${primaryExists ? 'EXISTS' : 'MISSING'}`);
+if (process.env.NODE_ENV === "production") {
+  console.log(`[Media] Secondary path (./dist/public/media): ${secondaryExists ? 'EXISTS' : 'MISSING'}`);
+}
+
+// Always serve from primary path with proper headers
+// The directory might not exist yet but that's OK - static middleware handles that
+app.use("/media", express.static(primaryPath, {
+  setHeaders: (res, filePath) => {
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeType = mimeTypes[ext];
+    if (ext === ".mp4") {
+      console.log(`[Media] Serving: ${filePath}`);
+    }
+    if (mimeType) {
+      res.setHeader("Content-Type", mimeType);
+    }
+    res.setHeader("Accept-Ranges", "bytes");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+  },
+}));
+
+// In production, also serve from dist/public as fallback
+if (process.env.NODE_ENV === "production") {
+  app.use("/media", express.static(secondaryPath, {
+    setHeaders: (res, filePath) => {
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeType = mimeTypes[ext];
+      if (ext === ".mp4") {
+        console.log(`[Media] Serving from dist: ${filePath}`);
+      }
+      if (mimeType) {
+        res.setHeader("Content-Type", mimeType);
+      }
+      res.setHeader("Accept-Ranges", "bytes");
+      res.setHeader("Cache-Control", "public, max-age=3600");
+    },
+  }));
+}
 
 app.use((req, res, next) => {
   const start = Date.now();
