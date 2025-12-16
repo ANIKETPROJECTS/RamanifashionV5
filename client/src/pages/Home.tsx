@@ -88,18 +88,20 @@ export default function Home() {
     console.log("[Video Debug] Checking for promotional video at /media/promotional-video.mp4");
     fetch("/media/promotional-video.mp4", { method: "HEAD" })
       .then((res) => {
+        const contentType = res.headers.get("content-type");
         console.log("[Video Debug] HEAD request response:", {
           ok: res.ok,
           status: res.status,
           statusText: res.statusText,
-          contentType: res.headers.get("content-type"),
+          contentType: contentType,
           url: res.url
         });
-        if (res.ok) {
+        // Check if response is actually a video file (not HTML from SPA catch-all)
+        if (res.ok && contentType && contentType.includes("video/mp4")) {
           console.log("[Video Debug] Video found, using local video URL");
           setVideoUrl("/media/promotional-video.mp4");
         } else {
-          console.log("[Video Debug] Video not found (status: " + res.status + "), using YouTube fallback");
+          console.log("[Video Debug] Video not found or wrong content-type (" + contentType + "), using YouTube fallback");
         }
       })
       .catch((err) => {
