@@ -518,6 +518,7 @@ export default function OrderManagement() {
                     <TableHead>Order #</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Items</TableHead>
+                    <TableHead>Product</TableHead>
                     <TableHead>Total</TableHead>
                     <TableHead>Order Status</TableHead>
                     <TableHead>Payment</TableHead>
@@ -547,6 +548,19 @@ export default function OrderManagement() {
                       <TableCell data-testid={`text-items-count-${order._id}`}>
                         {order.items.length} item(s)
                       </TableCell>
+                      <TableCell data-testid={`img-product-${order._id}`}>
+                        {order.items[0]?.image ? (
+                          <img 
+                            src={order.items[0].image} 
+                            alt={order.items[0].name}
+                            className="h-12 w-12 object-cover rounded-md"
+                          />
+                        ) : (
+                          <div className="h-12 w-12 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                            No image
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="font-semibold" data-testid={`text-total-${order._id}`}>
                         ₹{order.total.toLocaleString()}
                       </TableCell>
@@ -572,12 +586,12 @@ export default function OrderManagement() {
                       <TableCell className="text-right">
                         <Button
                           variant="outline"
-                          size="sm"
+                          size="icon"
                           onClick={() => handleViewDetails(order._id)}
                           data-testid={`button-view-${order._id}`}
+                          title="View Details"
                         >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View Details
+                          <Eye className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
