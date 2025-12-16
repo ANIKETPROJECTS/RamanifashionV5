@@ -35,7 +35,7 @@ export default function Orders() {
           apiRequest(`/api/payment/phonepe/status/${order.phonePeMerchantOrderId}`, 'GET')
             .then((response: any) => {
               console.log('[ORDERS PAGE] Status check response:', response);
-              if (response.state === 'COMPLETED') {
+              if (response.state === 'COMPLETED' || response.state === 'PAYMENT_SUCCESS') {
                 console.log('[ORDERS PAGE] Payment completed! Refreshing orders...');
                 queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
               }

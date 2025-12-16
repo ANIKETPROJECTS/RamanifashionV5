@@ -1187,8 +1187,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const statusResponse = await phonePeService.checkOrderStatus(merchantOrderId);
 
         if (statusResponse.success) {
-          const paymentStatus = statusResponse.state === 'COMPLETED' ? 'paid' : 
-                               statusResponse.state === 'FAILED' ? 'failed' : 'pending';
+          // Map PhonePe states to our payment status
+          let paymentStatus = 'pending';
+          if (statusResponse.state === 'COMPLETED' || statusResponse.state === 'PAYMENT_SUCCESS') {
+            paymentStatus = 'paid';
+          } else if (statusResponse.state === 'FAILED' || statusResponse.state === 'PAYMENT_FAILED' || statusResponse.state === 'PAYMENT_ERROR') {
+            paymentStatus = 'failed';
+          }
           
           console.log('[STATUS CHECK] PhonePe API response:', statusResponse.state, 'mapping to paymentStatus:', paymentStatus);
           
@@ -1290,8 +1295,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               paymentStatus = statusResponse.state;
               console.log('[PAYMENT CALLBACK] PhonePe API returned state:', paymentStatus);
               
-              const dbPaymentStatus = paymentStatus === 'COMPLETED' ? 'paid' : 
-                                    paymentStatus === 'FAILED' ? 'failed' : 'pending';
+              // Map PhonePe states to our payment status
+              let dbPaymentStatus = 'pending';
+              if (paymentStatus === 'COMPLETED' || paymentStatus === 'PAYMENT_SUCCESS') {
+                dbPaymentStatus = 'paid';
+              } else if (paymentStatus === 'FAILED' || paymentStatus === 'PAYMENT_FAILED' || paymentStatus === 'PAYMENT_ERROR') {
+                dbPaymentStatus = 'failed';
+              }
               
               console.log('[PAYMENT CALLBACK] Updating order with paymentStatus:', dbPaymentStatus);
               const updatedOrder = await Order.findByIdAndUpdate(order._id, {
@@ -1360,8 +1370,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('[WEBHOOK] Found order:', order?._id, 'for merchantOrderId:', callbackData.merchantOrderId);
         
         if (order) {
-          const paymentStatus = callbackData.state === 'COMPLETED' ? 'paid' :
-                               callbackData.state === 'FAILED' ? 'failed' : 'pending';
+          // Map PhonePe states to our payment status
+          let paymentStatus = 'pending';
+          if (callbackData.state === 'COMPLETED' || callbackData.state === 'PAYMENT_SUCCESS') {
+            paymentStatus = 'paid';
+          } else if (callbackData.state === 'FAILED' || callbackData.state === 'PAYMENT_FAILED' || callbackData.state === 'PAYMENT_ERROR') {
+            paymentStatus = 'failed';
+          }
           
           console.log('[WEBHOOK] Updating order with state:', callbackData.state, 'mapped to paymentStatus:', paymentStatus);
           
