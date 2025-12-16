@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,31 @@ export default function Orders() {
 
   // Log orders on load and when they update
   console.log('[ORDERS PAGE] Loaded - isLoading:', isLoading, 'Orders:', orders, 'Error:', error);
+
+  // Auto-check pending payments on page load
+  useEffect(() => {
+    if (!isLoading && orders && Array.isArray(orders)) {
+      console.log('[ORDERS PAGE] Checking for pending payments...');
+      orders.forEach((order: any) => {
+        if (order.paymentStatus === 'pending' && order.phonePeMerchantOrderId) {
+          console.log('[ORDERS PAGE] Found pending payment, checking status for:', order.phonePeMerchantOrderId);
+          
+          // Check payment status from PhonePe
+          apiRequest(`/api/payment/phonepe/status/${order.phonePeMerchantOrderId}`, 'GET')
+            .then((response: any) => {
+              console.log('[ORDERS PAGE] Status check response:', response);
+              if (response.state === 'COMPLETED') {
+                console.log('[ORDERS PAGE] Payment completed! Refreshing orders...');
+                queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+              }
+            })
+            .catch((err: any) => {
+              console.error('[ORDERS PAGE] Error checking payment status:', err);
+            });
+        }
+      });
+    }
+  }, [isLoading, orders]);
 
   const isUnauthorized = isError && error && String(error).includes("401:");
 

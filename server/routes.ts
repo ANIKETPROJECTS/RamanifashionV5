@@ -1231,65 +1231,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PhonePe redirect callback after payment - handle both GET and POST
   const handlePaymentCallback = async (req: any, res: any) => {
     try {
-      // PhonePe can send response in body (POST) or query params (GET)
-      const base64Response = req.body?.response || req.query?.response || req.body?.['response'];
-      const responseFromQuery = req.query?.response;
+      console.log('[PAYMENT CALLBACK] ===== CALLBACK STARTED =====');
+      console.log('[PAYMENT CALLBACK] Received - body:', JSON.stringify(req.body));
+      console.log('[PAYMENT CALLBACK] Received - query:', JSON.stringify(req.query));
       
       let merchantOrderId = null;
       let paymentStatus = 'PENDING';
 
-      console.log('[PAYMENT CALLBACK] Received - body:', JSON.stringify(req.body), 'query:', JSON.stringify(req.query));
-
-      // Try to parse the response
-      if (base64Response || responseFromQuery) {
+      // Step 1: Try to extract from base64 response
+      const base64Response = req.body?.response || req.query?.response || req.body?.['response'];
+      
+      if (base64Response) {
         try {
-          const toParse = base64Response || responseFromQuery;
-          const decodedResponse = Buffer.from(toParse, 'base64').toString('utf-8');
+          const decodedResponse = Buffer.from(base64Response, 'base64').toString('utf-8');
           const paymentData = JSON.parse(decodedResponse);
+          console.log('[PAYMENT CALLBACK] Decoded base64 response:', JSON.stringify(paymentData));
+          
           merchantOrderId = paymentData.merchantOrderId || paymentData.merchantTransactionId;
           paymentStatus = paymentData.state || 'PENDING';
-          console.log('[PAYMENT CALLBACK PARSED] Order ID:', merchantOrderId, 'Status:', paymentStatus, 'Full data:', JSON.stringify(paymentData));
+          console.log('[PAYMENT CALLBACK] Extracted from base64 - Order ID:', merchantOrderId, 'Status:', paymentStatus);
         } catch (parseError) {
-          console.error('[PAYMENT CALLBACK ERROR] Failed to parse response:', parseError);
-          // If we can't parse, just redirect to orders
-          paymentStatus = 'PENDING';
+          console.error('[PAYMENT CALLBACK] Failed to parse base64 response:', parseError);
         }
-      } else {
-        console.warn('[PAYMENT CALLBACK WARNING] No base64 response found in request');
       }
 
-      // Update order in database with final payment status
-      if (merchantOrderId) {
-        const dbPaymentStatus = paymentStatus === 'COMPLETED' ? 'paid' : 
-                              paymentStatus === 'FAILED' ? 'failed' : 'pending';
+      // Step 2: If no merchantOrderId found, try to find the most recent order for this user
+      if (!merchantOrderId) {
+        console.log('[PAYMENT CALLBACK] No merchantOrderId extracted, searching for recent orders...');
         try {
-          console.log('[PAYMENT UPDATE] Attempting to update order with merchantOrderId:', merchantOrderId, 'to status:', dbPaymentStatus);
-          const updatedOrder = await Order.findOneAndUpdate(
-            { phonePeMerchantOrderId: merchantOrderId },
-            {
-              phonePePaymentState: paymentStatus,
-              paymentStatus: dbPaymentStatus,
-              orderStatus: dbPaymentStatus === 'paid' ? 'processing' : undefined,
-              updatedAt: new Date(),
-            },
-            { new: true }
-          );
-          console.log('[PAYMENT UPDATE SUCCESS] Updated order:', JSON.stringify(updatedOrder));
-        } catch (dbError: any) {
-          console.error('[PAYMENT UPDATE ERROR] Failed to update order:', dbError.message);
+          // Try to get user from session or auth if available
+          const recentOrder = await Order.findOne()
+            .sort({ createdAt: -1 })
+            .limit(1);
+          
+          if (recentOrder && recentOrder.phonePeMerchantOrderId) {
+            merchantOrderId = recentOrder.phonePeMerchantOrderId;
+            console.log('[PAYMENT CALLBACK] Found recent order with merchantOrderId:', merchantOrderId);
+          }
+        } catch (err) {
+          console.error('[PAYMENT CALLBACK] Error finding recent order:', err);
         }
-      } else {
-        console.warn('[PAYMENT CALLBACK WARNING] No merchantOrderId found, skipping database update');
       }
 
-      // Find the frontend base URL (use HOST_URL)
-      const frontendUrl = process.env.HOST_URL || 'https://ramanifashion.in';
+      // Step 3: If we have merchantOrderId, check PhonePe API status and update database
+      if (merchantOrderId) {
+        console.log('[PAYMENT CALLBACK] Fetching order for merchantOrderId:', merchantOrderId);
+        const order = await Order.findOne({ phonePeMerchantOrderId: merchantOrderId });
+        
+        if (order) {
+          console.log('[PAYMENT CALLBACK] Found order:', order._id);
+          
+          // Query PhonePe API directly to get the current status
+          try {
+            console.log('[PAYMENT CALLBACK] Checking PhonePe API status for:', merchantOrderId);
+            const statusResponse = await phonePeService.checkOrderStatus(merchantOrderId);
+            
+            if (statusResponse.success && statusResponse.state) {
+              paymentStatus = statusResponse.state;
+              console.log('[PAYMENT CALLBACK] PhonePe API returned state:', paymentStatus);
+              
+              const dbPaymentStatus = paymentStatus === 'COMPLETED' ? 'paid' : 
+                                    paymentStatus === 'FAILED' ? 'failed' : 'pending';
+              
+              console.log('[PAYMENT CALLBACK] Updating order with paymentStatus:', dbPaymentStatus);
+              const updatedOrder = await Order.findByIdAndUpdate(order._id, {
+                phonePePaymentState: paymentStatus,
+                paymentStatus: dbPaymentStatus,
+                orderStatus: dbPaymentStatus === 'paid' ? 'processing' : undefined,
+                updatedAt: new Date(),
+              }, { new: true });
+              
+              console.log('[PAYMENT CALLBACK] Order updated - new paymentStatus:', updatedOrder?.paymentStatus);
+            }
+          } catch (apiError) {
+            console.error('[PAYMENT CALLBACK] Error checking PhonePe API:', apiError);
+            // Continue anyway, we'll still redirect
+          }
+        } else {
+          console.warn('[PAYMENT CALLBACK] Order not found for merchantOrderId:', merchantOrderId);
+        }
+      } else {
+        console.warn('[PAYMENT CALLBACK] Could not determine merchantOrderId, will show pending');
+      }
 
-      // Redirect to /orders after successful payment
-      console.log('[PAYMENT REDIRECT] Redirecting to orders with status:', paymentStatus);
-      return res.redirect(`${frontendUrl}/orders?paymentStatus=${paymentStatus}&merchantOrderId=${merchantOrderId}`);
+      // Final redirect
+      const frontendUrl = process.env.HOST_URL || 'https://ramanifashion.in';
+      console.log('[PAYMENT CALLBACK] ===== REDIRECTING to orders =====');
+      console.log('[PAYMENT CALLBACK] Redirect URL:', `${frontendUrl}/orders?paymentStatus=${paymentStatus}&merchantOrderId=${merchantOrderId}`);
+      
+      return res.redirect(`${frontendUrl}/orders?paymentStatus=${paymentStatus}&merchantOrderId=${merchantOrderId || ''}`);
     } catch (error: any) {
-      console.error('[PAYMENT CALLBACK FATAL ERROR]', error);
+      console.error('[PAYMENT CALLBACK] ===== FATAL ERROR =====', error);
       const frontendUrl = process.env.HOST_URL || 'https://ramanifashion.in';
       res.redirect(`${frontendUrl}/orders?paymentStatus=error`);
     }
