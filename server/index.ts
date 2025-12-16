@@ -44,15 +44,8 @@ app.use("/attached_assets", express.static(path.resolve("./attached_assets")));
 // Serve static files from uploads directory
 app.use("/uploads", express.static(path.resolve("./uploads")));
 
-// Serve static files from media directory (admin uploads)
-// In production, Vite copies public/ to dist/public/, so we need to serve from both locations
-const isProduction = process.env.NODE_ENV === "production";
-const mediaPath = isProduction 
-  ? path.resolve("./dist/public/media")
-  : path.resolve("./public/media");
-
-// Configure MIME types for media files
-const mimeTypes = {
+// Serve static files from media directory with proper video streaming headers
+const mimeTypes: Record<string, string> = {
   ".mp4": "video/mp4",
   ".webm": "video/webm",
   ".ogv": "video/ogg",
@@ -62,39 +55,36 @@ const mimeTypes = {
   ".gif": "image/gif",
 };
 
-app.use("/media", (req, res, next) => {
-  const filePath = path.join(mediaPath, req.path);
-  const ext = path.extname(filePath).toLowerCase();
-  const mimeType = mimeTypes[ext as keyof typeof mimeTypes];
-  
-  // Log video requests for debugging
-  if (ext === ".mp4") {
-    console.log(`[Media] Serving ${req.path} from ${filePath}`);
-    try {
-      const stats = fs.statSync(filePath);
-      console.log(`[Media] File size: ${stats.size} bytes`);
-    } catch (e) {
-      console.error(`[Media] Error stat file: ${e}`);
+// Primary media serving - handles both dev and production
+app.use("/media", express.static(path.resolve("./public/media"), {
+  setHeaders: (res, filePath) => {
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeType = mimeTypes[ext];
+    
+    if (ext === ".mp4") {
+      console.log(`[Media] Serving video: ${filePath}`);
+      try {
+        const stats = fs.statSync(filePath);
+        console.log(`[Media] Video size: ${stats.size} bytes`);
+      } catch (e) {
+        console.error(`[Media] Error accessing file: ${e}`);
+      }
     }
-  }
-  
-  if (mimeType) {
-    res.setHeader("Content-Type", mimeType);
-  }
-  
-  // Enable Range requests for video streaming
-  res.setHeader("Accept-Ranges", "bytes");
-  res.setHeader("Cache-Control", "public, max-age=3600");
-  
-  express.static(mediaPath)(req, res, next);
-});
+    
+    if (mimeType) {
+      res.setHeader("Content-Type", mimeType);
+    }
+    res.setHeader("Accept-Ranges", "bytes");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+  },
+}));
 
-// Also try the production path as fallback in case files are in different locations
-if (isProduction) {
-  app.use("/media", express.static(path.resolve("./public/media"), {
+// In production, also serve from dist/public as fallback (files copied during build)
+if (process.env.NODE_ENV === "production") {
+  app.use("/media", express.static(path.resolve("./dist/public/media"), {
     setHeaders: (res, filePath) => {
       const ext = path.extname(filePath).toLowerCase();
-      const mimeType = mimeTypes[ext as keyof typeof mimeTypes];
+      const mimeType = mimeTypes[ext];
       if (mimeType) {
         res.setHeader("Content-Type", mimeType);
       }
