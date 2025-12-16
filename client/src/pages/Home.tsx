@@ -85,14 +85,26 @@ export default function Home() {
 
   // Load uploaded promotional video with fallback to YouTube
   useEffect(() => {
+    console.log("[Video Debug] Checking for promotional video at /media/promotional-video.mp4");
     fetch("/media/promotional-video.mp4", { method: "HEAD" })
       .then((res) => {
+        console.log("[Video Debug] HEAD request response:", {
+          ok: res.ok,
+          status: res.status,
+          statusText: res.statusText,
+          contentType: res.headers.get("content-type"),
+          url: res.url
+        });
         if (res.ok) {
+          console.log("[Video Debug] Video found, using local video URL");
           setVideoUrl("/media/promotional-video.mp4");
+        } else {
+          console.log("[Video Debug] Video not found (status: " + res.status + "), using YouTube fallback");
         }
       })
-      .catch(() => {
-        // Keep default YouTube URL
+      .catch((err) => {
+        console.error("[Video Debug] Error fetching video:", err);
+        console.log("[Video Debug] Keeping YouTube fallback URL");
       });
   }, []);
 
@@ -548,8 +560,18 @@ export default function Home() {
                   loop
                   playsInline
                   data-testid="video-banner"
+                  onError={(e) => {
+                    console.error("[Video Debug] Video element error:", e);
+                    console.error("[Video Debug] Video src:", videoUrl);
+                    console.error("[Video Debug] Video networkState:", (e.target as HTMLVideoElement).networkState);
+                    console.error("[Video Debug] Video error code:", (e.target as HTMLVideoElement).error?.code);
+                    console.error("[Video Debug] Video error message:", (e.target as HTMLVideoElement).error?.message);
+                  }}
+                  onLoadStart={() => console.log("[Video Debug] Video load started for:", videoUrl)}
+                  onLoadedData={() => console.log("[Video Debug] Video data loaded successfully")}
+                  onCanPlay={() => console.log("[Video Debug] Video can play")}
                 >
-                  <source src={videoUrl} type="video/mp4" />
+                  <source src={videoUrl} type="video/mp4" onError={(e) => console.error("[Video Debug] Source error:", e)} />
                   Your browser does not support the video tag.
                 </video>
               )}
