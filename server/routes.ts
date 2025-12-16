@@ -2354,6 +2354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .skip(skip)
         .limit(limitNum)
         .populate('userId', 'name email phone')
+        .populate('items.productId', 'name description images')
         .lean();
 
       const total = await Order.countDocuments(query);
@@ -2376,7 +2377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const order = await Order.findById(req.params.id)
         .populate('userId', 'name email phone')
-        .populate('items.productId', 'name images')
+        .populate('items.productId', 'name description images')
         .lean();
       if (!order) {
         return res.status(404).json({ error: 'Order not found' });

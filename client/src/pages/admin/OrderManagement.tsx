@@ -39,6 +39,7 @@ interface Order {
   items: Array<{
     productId: string;
     name: string;
+    description?: string;
     price: number;
     quantity: number;
     image?: string;
@@ -552,24 +553,31 @@ export default function OrderManagement() {
                       <TableCell data-testid={`text-items-count-${order._id}`}>
                         {order.items.length} item(s)
                       </TableCell>
-                      <TableCell data-testid={`img-product-${order._id}`}>
-                        {order.items[0]?.image ? (
-                          <img 
-                            src={order.items[0].image} 
-                            alt={order.items[0].name}
-                            className="h-20 w-20 object-cover rounded-md cursor-pointer hover-elevate"
-                            onClick={() => {
-                              if (order.items[0]?.image) {
-                                setPreviewImage(order.items[0].image);
-                                setPreviewImageOpen(true);
-                              }
-                            }}
-                          />
-                        ) : (
-                          <div className="h-20 w-20 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
-                            No image
+                      <TableCell data-testid={`cell-product-${order._id}`}>
+                        <div className="space-y-1">
+                          <div className="font-bold text-sm" data-testid={`text-product-name-${order._id}`}>
+                            {order.items[0]?.name}
                           </div>
-                        )}
+                          {order.items[0]?.description && (
+                            <div className="text-xs text-muted-foreground line-clamp-2" data-testid={`text-product-desc-${order._id}`}>
+                              {order.items[0].description}
+                            </div>
+                          )}
+                          {order.items[0]?.image && (
+                            <img 
+                              src={order.items[0].image} 
+                              alt={order.items[0].name}
+                              className="h-20 w-20 object-cover rounded-md cursor-pointer hover-elevate"
+                              onClick={() => {
+                                if (order.items[0]?.image) {
+                                  setPreviewImage(order.items[0].image);
+                                  setPreviewImageOpen(true);
+                                }
+                              }}
+                              data-testid={`img-product-${order._id}`}
+                            />
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="font-semibold" data-testid={`text-total-${order._id}`}>
                         ₹{order.total.toLocaleString()}
@@ -773,7 +781,12 @@ export default function OrderManagement() {
                           <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
                         )}
                         <div className="flex-1">
-                          <div className="font-medium">{item.name}</div>
+                          <div className="font-bold">{item.name}</div>
+                          {item.description && (
+                            <div className="text-xs text-muted-foreground line-clamp-2 mb-1">
+                              {item.description}
+                            </div>
+                          )}
                           <div className="text-sm text-muted-foreground">
                             Qty: {item.quantity} × ₹{item.price.toLocaleString()}
                           </div>
