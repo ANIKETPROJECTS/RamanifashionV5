@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import AdminLayout from "@/components/AdminLayout";
@@ -126,6 +126,22 @@ export default function CustomerManagement() {
 
   const customers = customersData?.customers || [];
   const pagination = customersData?.pagination;
+
+  // Extract unique cities and states from customer addresses
+  const { uniqueCities, uniqueStates } = useMemo(() => {
+    const cities = new Set<string>();
+    const states = new Set<string>();
+    
+    customers.forEach(customer => {
+      if (customer.address?.city) cities.add(customer.address.city);
+      if (customer.address?.state) states.add(customer.address.state);
+    });
+    
+    return {
+      uniqueCities: Array.from(cities).sort(),
+      uniqueStates: Array.from(states).sort(),
+    };
+  }, [customers]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -280,27 +296,41 @@ export default function CustomerManagement() {
               <div className="text-sm font-medium">Advanced Filters</div>
               <div className="flex flex-wrap gap-4">
                 <div className="flex-1 min-w-[150px]">
-                  <Input
-                    placeholder="Filter by city..."
-                    value={filterCity}
-                    onChange={(e) => {
-                      setFilterCity(e.target.value);
-                      setPage(1);
-                    }}
-                    data-testid="input-filter-city"
-                  />
+                  <Select value={filterCity} onValueChange={(value) => {
+                    setFilterCity(value);
+                    setPage(1);
+                  }}>
+                    <SelectTrigger data-testid="select-filter-city">
+                      <SelectValue placeholder="Filter by city..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Cities</SelectItem>
+                      {uniqueCities.map((city) => (
+                        <SelectItem key={city} value={city}>
+                          {city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="flex-1 min-w-[150px]">
-                  <Input
-                    placeholder="Filter by state..."
-                    value={filterState}
-                    onChange={(e) => {
-                      setFilterState(e.target.value);
-                      setPage(1);
-                    }}
-                    data-testid="input-filter-state"
-                  />
+                  <Select value={filterState} onValueChange={(value) => {
+                    setFilterState(value);
+                    setPage(1);
+                  }}>
+                    <SelectTrigger data-testid="select-filter-state">
+                      <SelectValue placeholder="Filter by state..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All States</SelectItem>
+                      {uniqueStates.map((state) => (
+                        <SelectItem key={state} value={state}>
+                          {state}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <Select value={lastActivityDays} onValueChange={(value) => {
