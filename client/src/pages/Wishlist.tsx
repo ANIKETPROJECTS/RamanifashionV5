@@ -156,7 +156,7 @@ export default function Wishlist() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-2 right-2 bg-white/90 hover:bg-white"
+                  className="absolute top-2 right-2 z-10 bg-white/90 dark:bg-black/80"
                   onClick={() => removeFromWishlistMutation.mutate(product._id)}
                   data-testid={`button-remove-${product._id}`}
                 >
