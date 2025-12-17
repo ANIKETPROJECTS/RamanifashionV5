@@ -143,7 +143,16 @@ export default function Wishlist() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product: any) => (
-            <Card key={product._id} className="overflow-hidden hover-elevate" data-testid={`wishlist-item-${product._id}`}>
+            <Card key={product._id} className="relative overflow-hidden hover-elevate" data-testid={`wishlist-item-${product._id}`}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 z-20 bg-white/90 dark:bg-black/80 rounded-full"
+                onClick={() => removeFromWishlistMutation.mutate(product._id)}
+                data-testid={`button-remove-${product._id}`}
+              >
+                <X className="h-5 w-5" />
+              </Button>
               <div className="relative">
                 <img
                   src={product.displayImages?.[0] || product.images?.[0] || "/default-saree.jpg"}
@@ -153,15 +162,6 @@ export default function Wishlist() {
                   data-testid={`img-product-${product._id}`}
                   onError={(e) => { e.currentTarget.src = '/default-saree.jpg'; }}
                 />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 z-10 bg-white/90 dark:bg-black/80"
-                  onClick={() => removeFromWishlistMutation.mutate(product._id)}
-                  data-testid={`button-remove-${product._id}`}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
                 {!product.inStock && (
                   <div className="absolute top-2 left-2 bg-red-500 text-white px-3 py-1 text-sm font-semibold rounded">
                     Out of Stock
