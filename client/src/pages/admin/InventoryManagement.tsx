@@ -120,11 +120,15 @@ export default function InventoryManagement() {
         body: formData
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const errMsg = data?.error || data?.details || `Server error ${response.status}`;
+        console.error('[Upload] Failed:', response.status, data);
+        throw new Error(errMsg);
       }
 
-      const data = await response.json();
+      console.log('[Upload] Success:', data.urls);
       setUploadedImages([...uploadedImages, ...data.urls]);
       toast({ title: "Images uploaded successfully!" });
       
@@ -132,6 +136,7 @@ export default function InventoryManagement() {
         fileInputRef.current.value = '';
       }
     } catch (error: any) {
+      console.error('[Upload] Error:', error);
       toast({ 
         title: "Upload failed", 
         description: error.message,
