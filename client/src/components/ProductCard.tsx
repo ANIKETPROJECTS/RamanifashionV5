@@ -178,12 +178,12 @@ export default function ProductCard({
   
   return (
     <Card 
-      className="overflow-hidden cursor-pointer hover-elevate active-elevate-2 group"
+      className="overflow-hidden cursor-pointer hover-elevate active-elevate-2 group flex flex-col h-full"
       onClick={() => onClick ? onClick() : setLocation(`/product/${productDetailId}`)}
       onMouseEnter={() => prefetchProduct(productDetailId)}
       data-testid={testId}
     >
-      <div className="relative aspect-[3/5] overflow-hidden">
+      <div className="relative aspect-[3/4] overflow-hidden flex-shrink-0">
         <img
           src={currentImage || "/default-saree.jpg"}
           alt={name}
@@ -232,18 +232,16 @@ export default function ProductCard({
         </div>
       </div>
 
-      <CardContent className="p-4">
-        <h3 className="font-medium text-sm line-clamp-2 mb-2" data-testid={`text-product-name-${id}`}>
+      <CardContent className="p-4 flex flex-col flex-1">
+        <h3 className="font-medium text-sm line-clamp-2 mb-1" data-testid={`text-product-name-${id}`}>
           {name}
         </h3>
 
-        {displayShortDescription && (
-          <p className="text-xs text-muted-foreground line-clamp-1 mb-2" data-testid={`text-short-description-${id}`}>
-            {displayShortDescription}
-          </p>
-        )}
+        <p className="text-xs text-muted-foreground line-clamp-1 mb-2 min-h-[1rem]" data-testid={`text-short-description-${id}`}>
+          {displayShortDescription || ""}
+        </p>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap mt-auto">
           <span className="text-lg font-bold text-black" data-testid={`text-price-${id}`}>
             ₹{price.toLocaleString()}
           </span>
