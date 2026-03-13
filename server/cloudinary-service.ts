@@ -1,11 +1,22 @@
 import { v2 as cloudinary } from "cloudinary";
 import sharp from "sharp";
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+function configureCloudinary() {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    const missing = [
+      !cloudName && "CLOUDINARY_CLOUD_NAME",
+      !apiKey && "CLOUDINARY_API_KEY",
+      !apiSecret && "CLOUDINARY_API_SECRET",
+    ].filter(Boolean);
+    throw new Error(`Missing Cloudinary environment variables: ${missing.join(", ")}. Add them to your .env file.`);
+  }
+
+  cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret });
+}
 
 async function compressImage(buffer: Buffer): Promise<Buffer> {
   const image = sharp(buffer);
@@ -26,6 +37,7 @@ export async function uploadToCloudinary(
   buffer: Buffer,
   originalName: string,
 ): Promise<string> {
+  configureCloudinary();
   console.log(`[Cloudinary] Compressing image: ${originalName} (${(buffer.length / 1024 / 1024).toFixed(2)} MB)`);
 
   const compressed = await compressImage(buffer);
