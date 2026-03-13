@@ -300,7 +300,7 @@ export default function Home() {
                       data-testid={`category-circle-${category.name.toLowerCase().replace(/\s+/g, "-")}`}
                     >
                       <div
-                        className="hidden w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden mb-2 md:mb-3 transition-all duration-300 group-hover:scale-105"
+                        className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden mb-2 md:mb-3 transition-all duration-300 group-hover:scale-105"
                         style={{
                           border: "2px solid hsl(338, 78%, 62%)",
                           padding: "3px",
@@ -310,7 +310,7 @@ export default function Home() {
                           <img
                             src={category.image}
                             alt={category.name}
-                            className="w-full h-full object-cover"
+                            className="hidden w-full h-full object-cover"
                           />
                         </div>
                       </div>
@@ -584,11 +584,11 @@ export default function Home() {
                 }}
                 data-testid={`category-card-${category.name.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                <div className="hidden w-full aspect-[2/3] overflow-hidden rounded-lg mb-3 md:mb-4 shadow-md hover:shadow-xl transition-shadow duration-300">
+                <div className="w-full aspect-[2/3] overflow-hidden rounded-lg mb-3 md:mb-4 shadow-md hover:shadow-xl transition-shadow duration-300">
                   <img
                     src={category.image}
                     alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="hidden w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
                 <h3 className="text-center text-xs md:text-base lg:text-lg font-bold font-serif bg-primary text-white border-2 border-white rounded-full px-3 md:px-6 py-1.5 md:py-2 inline-block">

@@ -396,11 +396,11 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                             className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
                             data-testid="category-jamdani-paithani"
                           >
-                            <div className="hidden relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                               <img
                                 src={paithaniImage}
                                 alt="Jamdani Paithani"
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                className="hidden w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               />
                             </div>
                             <div className="mt-2 md:mt-3 text-center">
@@ -414,11 +414,11 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                             className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
                             data-testid="category-khun-irkal"
                           >
-                            <div className="hidden relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                               <img
                                 src={khunIrkalImage}
                                 alt="Khun / Irkal (Ilkal)"
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                className="hidden w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               />
                             </div>
                             <div className="mt-2 md:mt-3 text-center">
@@ -432,11 +432,11 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                             className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
                             data-testid="category-ajrakh-modal"
                           >
-                            <div className="hidden relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                               <img
                                 src={ajrakhModalImage}
                                 alt="Ajrakh Modal"
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                className="hidden w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               />
                             </div>
                             <div className="mt-2 md:mt-3 text-center">
@@ -450,11 +450,11 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                             className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
                             data-testid="category-mul-mul-cotton"
                           >
-                            <div className="hidden relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                               <img
                                 src={mulCottonImage}
                                 alt="Mul Mul Cotton"
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                className="hidden w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               />
                             </div>
                             <div className="mt-2 md:mt-3 text-center">
@@ -468,11 +468,11 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                             className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
                             data-testid="category-khadi-cotton"
                           >
-                            <div className="hidden relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                               <img
                                 src={khadiCottonImage}
                                 alt="Khadi Cotton"
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                className="hidden w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               />
                             </div>
                             <div className="mt-2 md:mt-3 text-center">
@@ -486,11 +486,11 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                             className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
                             data-testid="category-patch-work"
                           >
-                            <div className="hidden relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                               <img
                                 src={patchWorkImage}
                                 alt="Patch Work"
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                className="hidden w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               />
                             </div>
                             <div className="mt-2 md:mt-3 text-center">
@@ -504,11 +504,11 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onMenuClick }
                             className="group flex flex-col items-center flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 xl:w-40"
                             data-testid="category-pure-linen"
                           >
-                            <div className="hidden relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                            <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg border-2 border-transparent group-hover:border-pink-500 transition-all duration-300 shadow-md group-hover:shadow-xl">
                               <img
                                 src={pureLinenImage}
                                 alt="Pure Linen"
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                className="hidden w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               />
                             </div>
                             <div className="mt-2 md:mt-3 text-center">
