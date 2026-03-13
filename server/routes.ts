@@ -10,6 +10,7 @@ import path from "path";
 import fs from "fs";
 import XLSX from "xlsx";
 import { upload, mediaUpload } from "./upload-config";
+import { uploadToCloudinary } from "./cloudinary-service";
 import { sendWhatsAppOTP, generateOTP, sendOrderConfirmation } from "./whatsapp-service";
 import { phonePeService } from "./phonepe-service";
 import { shiprocketService } from "./shiprocket.service";
@@ -1627,12 +1628,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin Image Upload Route
+  // Admin Image Upload Route — uploads to Cloudinary, stores URL in MongoDB
   app.post("/api/admin/upload-images", authenticateAdmin, (req, res) => {
-    upload.array('images', 5)(req, res, (err: any) => {
+    upload.array('images', 5)(req, res, async (err: any) => {
       if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
-          return res.status(400).json({ error: 'File too large (max 5MB per file)' });
+          return res.status(400).json({ error: 'File too large (max 50MB per file)' });
         }
         if (err.code === 'LIMIT_FILE_COUNT') {
           return res.status(400).json({ error: 'Too many files (max 5 files)' });
@@ -1647,13 +1648,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const files = req.files as Express.Multer.File[];
-      const uploadedUrls = files.map(file => `/uploads/${file.filename}`);
 
-      res.json({
-        success: true,
-        urls: uploadedUrls,
-        message: `${files.length} file(s) uploaded successfully`
-      });
+      try {
+        const uploadPromises = files.map(file =>
+          uploadToCloudinary(file.buffer, file.originalname)
+        );
+        const cloudinaryUrls = await Promise.all(uploadPromises);
+
+        res.json({
+          success: true,
+          urls: cloudinaryUrls,
+          message: `${files.length} file(s) uploaded successfully`
+        });
+      } catch (uploadError: any) {
+        console.error('[Cloudinary] Upload error:', uploadError);
+        res.status(500).json({ error: 'Failed to upload images to Cloudinary', details: uploadError.message });
+      }
     });
   });
 

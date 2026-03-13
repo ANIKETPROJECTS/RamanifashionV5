@@ -1,22 +1,24 @@
 import multer from "multer";
 import path from "path";
-import crypto from "crypto";
 import fs from "fs";
 
-// Ensure uploads directory exists
+// Ensure uploads directory exists (still used for media/hero/video files)
 const uploadsDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Configure multer storage
+// Memory storage — for product images uploaded to Cloudinary
+const memoryStorage = multer.memoryStorage();
+
+// Disk storage — still used for media (hero banner, video) saved locally
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadsDir);
   },
   filename: function (req, file, cb) {
-    // Generate secure random filename
-    crypto.randomBytes(16, (err, raw) => {
+    const { randomBytes } = require('crypto');
+    randomBytes(16, (err: Error | null, raw: Buffer) => {
       if (err) return cb(err, '');
       const ext = path.extname(file.originalname).toLowerCase();
       cb(null, raw.toString('hex') + ext);
@@ -71,9 +73,9 @@ const mediaFileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFil
   }
 };
 
-// Multer configuration for product images
+// Multer configuration for product images — uses memory storage for Cloudinary upload
 export const upload = multer({
-  storage: storage,
+  storage: memoryStorage,
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB max file size
     files: 5                     // Max 5 files per request
