@@ -119,11 +119,11 @@ export default function NewArrivalCard({
 
   return (
     <Card 
-      className="overflow-hidden cursor-pointer hover-elevate active-elevate-2 group min-w-[200px] md:min-w-[250px]"
+      className="overflow-hidden cursor-pointer hover-elevate active-elevate-2 group min-w-[200px] md:min-w-[250px] flex flex-col h-full"
       onClick={() => onClick ? onClick() : setLocation(`/product/${id}`)}
       data-testid={`card-new-arrival-${id}`}
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
+      <div className="relative aspect-[3/4] overflow-hidden bg-gray-100 flex-shrink-0">
         <img
           src={currentImage || placeholderImage}
           alt={name}
@@ -173,12 +173,12 @@ export default function NewArrivalCard({
         </div>
       </div>
 
-      <CardContent className="p-3">
-        <h3 className="font-medium text-sm line-clamp-2 mb-2" data-testid={`text-product-name-${id}`}>
+      <CardContent className="p-3 flex flex-col flex-1">
+        <h3 className="font-medium text-sm line-clamp-2 mb-1" data-testid={`text-product-name-${id}`}>
           {name}
         </h3>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap mt-auto">
           <span className="text-lg font-bold text-black" data-testid={`text-price-${id}`}>
             ₹{price.toLocaleString()}
           </span>

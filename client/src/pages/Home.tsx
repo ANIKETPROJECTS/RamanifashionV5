@@ -361,7 +361,7 @@ export default function Home() {
             </motion.div>
             <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
               <motion.div
-                className="flex gap-4 pb-4"
+                className="flex items-stretch gap-4 pb-4"
                 variants={staggerContainer}
                 initial="hidden"
                 whileInView="visible"
@@ -372,6 +372,7 @@ export default function Home() {
                     key={product._id}
                     variants={fadeInUp}
                     transition={{ duration: 0.5 }}
+                    className="h-full"
                   >
                     <NewArrivalCard
                       id={product._id}
@@ -463,7 +464,7 @@ export default function Home() {
             </motion.div>
             <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
               <motion.div
-                className="flex gap-4 pb-4"
+                className="flex items-stretch gap-4 pb-4"
                 variants={staggerContainer}
                 initial="hidden"
                 whileInView="visible"
@@ -476,6 +477,7 @@ export default function Home() {
                       key={product._id}
                       variants={fadeInUp}
                       transition={{ duration: 0.5 }}
+                      className="h-full"
                     >
                       <NewArrivalCard
                         id={product._id}
