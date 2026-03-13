@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import HeroCarousel from "@/components/HeroCarousel";
 import CategoryCard from "@/components/CategoryCard";
-import NewArrivalCard from "@/components/NewArrivalCard";
+import ProductCard from "@/components/ProductCard";
 import TestimonialCard from "@/components/TestimonialCard";
 import Footer from "@/components/Footer";
 import { useLocation } from "wouter";
@@ -374,7 +374,7 @@ export default function Home() {
                     transition={{ duration: 0.5 }}
                     className="flex flex-col w-[200px] md:w-[250px] flex-shrink-0"
                   >
-                    <NewArrivalCard
+                    <ProductCard
                       id={product._id}
                       name={product.name}
                       image={product.displayImages?.[0] || product.images?.[0]}
@@ -394,6 +394,7 @@ export default function Home() {
                       }
                       rating={product.rating}
                       reviewCount={product.reviewCount}
+                      isNew={true}
                       onClick={() => setLocation(`/product/${product._id}`)}
                     />
                   </motion.div>
@@ -479,7 +480,7 @@ export default function Home() {
                       transition={{ duration: 0.5 }}
                       className="flex flex-col w-[200px] md:w-[250px] flex-shrink-0"
                     >
-                      <NewArrivalCard
+                      <ProductCard
                         id={product._id}
                         name={product.name}
                         image={
