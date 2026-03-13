@@ -183,7 +183,7 @@ export default function ProductCard({
       onMouseEnter={() => prefetchProduct(productDetailId)}
       data-testid={testId}
     >
-      <div className="relative aspect-[4/5] overflow-hidden flex-shrink-0">
+      <div className="relative aspect-square overflow-hidden flex-shrink-0">
         <img
           src={currentImage || "/default-saree.jpg"}
           alt={name}
