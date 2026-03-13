@@ -1,5 +1,6 @@
 import { connectDB } from './db';
-import { Product, Settings } from './models';
+import { Product, Settings, AdminUser } from './models';
+import bcrypt from 'bcryptjs';
 
 const sampleProducts = [
   {
@@ -547,16 +548,25 @@ export async function seedDatabase() {
       console.log('✅ Settings initialized with shipping charges: ₹0, free shipping threshold: ₹999');
     }
     
+    // Seed admin user if not exists
+    const adminEmail = 'admin@ramanifashion.com';
+    const existingAdmin = await AdminUser.findOne({ email: adminEmail });
+    if (!existingAdmin) {
+      console.log('🌱 Creating admin user...');
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      await AdminUser.create({ email: adminEmail, password: hashedPassword, role: 'admin' });
+      console.log('✅ Admin user created:', adminEmail);
+    } else {
+      console.log('✅ Admin user already exists:', adminEmail);
+    }
+
     const count = await Product.countDocuments();
     if (count === 0) {
-      console.log('🌱 Seeding database with sample products...');
-      await Product.insertMany(sampleProducts);
-      console.log('✅ Database seeded successfully with', sampleProducts.length, 'products');
+      console.log('ℹ️  No products found, skipping sample product seed (add products via admin panel)');
     } else {
-      console.log(`✅ Database already contains ${count} products, skipping seed`);
+      console.log(`✅ Database already contains ${count} products`);
     }
   } catch (error) {
     console.error('❌ Error seeding database:', error);
-    throw error;
   }
 }

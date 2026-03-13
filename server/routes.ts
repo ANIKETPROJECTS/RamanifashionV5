@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { connectDB } from "./db";
-import { Product, User, Customer, Cart, Wishlist, Order, Address, ContactSubmission, OTP, Review, Settings } from "./models";
+import { Product, User, Customer, Cart, Wishlist, Order, Address, ContactSubmission, OTP, Review, Settings, AdminUser } from "./models";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -1548,30 +1548,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password } = req.body;
 
-      // ⚠️ SECURITY WARNING: These credentials are hardcoded and should be moved to a secure database
-      // TODO: URGENT - Move admin credentials to database with bcrypt password hashing
-      // TODO: Add environment variables for sensitive configuration
-      // TODO: Implement proper admin user management with role-based access control
-      const ADMIN_USERNAME = "admin@ramanifashion.com";
-      const ADMIN_PASSWORD = "admin123";
-
-      if (username !== ADMIN_USERNAME) {
+      const admin = await AdminUser.findOne({ email: username });
+      if (!admin) {
         return res.status(401).json({ error: 'Invalid admin credentials' });
       }
 
-      if (password !== ADMIN_PASSWORD) {
+      const passwordMatch = await bcrypt.compare(password, admin.password);
+      if (!passwordMatch) {
         return res.status(401).json({ error: 'Invalid admin credentials' });
       }
 
       const token = jwt.sign(
-        { adminId: 'admin-1', username: ADMIN_USERNAME, role: 'admin' },
+        { adminId: admin._id.toString(), username: admin.email, role: admin.role },
         ADMIN_JWT_SECRET,
         { expiresIn: '24h' }
       );
 
       res.json({
         token,
-        admin: { id: 'admin-1', username: ADMIN_USERNAME, role: 'admin' }
+        admin: { id: admin._id.toString(), username: admin.email, role: admin.role }
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

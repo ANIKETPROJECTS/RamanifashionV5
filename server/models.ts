@@ -413,7 +413,16 @@ const settingsSchema = new Schema({
   updatedBy: { type: String },
 });
 
+// Admin User Schema
+const adminUserSchema = new Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, default: 'admin' },
+  createdAt: { type: Date, default: Date.now },
+});
+
 // Export models
+export const AdminUser = mongoose.models.AdminUser || mongoose.model('AdminUser', adminUserSchema);
 export const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
 export const User = mongoose.models.User || mongoose.model('User', userSchema);
 export const Customer = mongoose.models.Customer || mongoose.model('Customer', customerSchema);
