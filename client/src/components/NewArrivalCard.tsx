@@ -119,7 +119,7 @@ export default function NewArrivalCard({
 
   return (
     <Card 
-      className="overflow-hidden cursor-pointer hover-elevate active-elevate-2 group min-w-[200px] md:min-w-[250px] flex flex-col h-full"
+      className="overflow-hidden cursor-pointer hover-elevate active-elevate-2 group min-w-[200px] md:min-w-[250px] flex flex-col flex-1"
       onClick={() => onClick ? onClick() : setLocation(`/product/${id}`)}
       data-testid={`card-new-arrival-${id}`}
     >

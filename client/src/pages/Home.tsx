@@ -372,7 +372,7 @@ export default function Home() {
                     key={product._id}
                     variants={fadeInUp}
                     transition={{ duration: 0.5 }}
-                    className="h-full"
+                    className="flex flex-col"
                   >
                     <NewArrivalCard
                       id={product._id}
@@ -477,7 +477,7 @@ export default function Home() {
                       key={product._id}
                       variants={fadeInUp}
                       transition={{ duration: 0.5 }}
-                      className="h-full"
+                      className="flex flex-col"
                     >
                       <NewArrivalCard
                         id={product._id}
