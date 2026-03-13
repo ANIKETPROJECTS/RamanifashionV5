@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Link as LinkIcon, Trash2, Edit2, Plus, X } from "lucide-react";
+import { compressImageFile } from "@/lib/compressImage";
 
 export interface ColorVariant {
   color: string;
@@ -47,8 +48,9 @@ export function ColorVariantEditor({ variants, onChange, availableColors, adminT
       return newState;
     });
 
+    const compressed = await compressImageFile(file);
     const formData = new FormData();
-    formData.append('images', file);
+    formData.append('images', compressed);
 
     try {
       const response = await fetch('/api/admin/upload-images', {
