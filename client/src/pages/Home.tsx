@@ -44,7 +44,6 @@ import casualImage from "@assets/generated_images/Casual_linen_saree_030a208d.pn
 import banarasiImage from "@assets/generated_images/Banarasi_saree_detail_604e6fdd.png";
 import festiveImage from "@assets/generated_images/Festive_collection_banner_7a822710.png";
 import customerImage from "@assets/generated_images/Customer_testimonial_portrait_6ffe6534.png";
-import ramaniBannerStatic from "@/assets/ramani-banner.png";
 import paithaniImage from "@/assets/paithani.png";
 import khunIrkalImage from "@/assets/khun-irkal.png";
 import ajrakhModalImage from "@/assets/ajrakh-modal.png";
@@ -69,17 +68,14 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [ramaniBanner, setRamaniBanner] = useState<string>(ramaniBannerStatic);
-  const [videoUrl, setVideoUrl] = useState<string>(
-    "https://www.youtube.com/embed/dlCJY6x-xtI?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=dlCJY6x-xtI"
-  );
+  const [ramaniBanner, setRamaniBanner] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const cacheBust = Date.now();
     const img = new Image();
     img.onload = () => setRamaniBanner(`/media/ramani-banner.png?t=${cacheBust}`);
-    img.onerror = () => setRamaniBanner(ramaniBannerStatic);
     img.src = `/media/ramani-banner.png?t=${cacheBust}`;
   }, []);
 
@@ -422,18 +418,15 @@ export default function Home() {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
         >
-          <div className="w-full overflow-hidden rounded-lg">
-            <img
-              src={ramaniBanner}
-              alt="Ramani Fashion - Shop the authentic Silk Sarees, crafted with perfection by local artisans"
-              className="w-full h-auto object-cover"
-              onError={(e) => {
-                if (e.currentTarget.src !== ramaniBannerStatic) {
-                  e.currentTarget.src = ramaniBannerStatic;
-                }
-              }}
-            />
-          </div>
+          {ramaniBanner && (
+            <div className="w-full overflow-hidden rounded-lg">
+              <img
+                src={ramaniBanner}
+                alt="Ramani Fashion - Shop the authentic Silk Sarees, crafted with perfection by local artisans"
+                className="w-full h-auto object-cover"
+              />
+            </div>
+          )}
         </motion.section>
 
         <motion.section
@@ -524,27 +517,16 @@ export default function Home() {
           </div>
         </motion.section>
 
-        <motion.section
-          className="max-w-7xl mx-auto px-4 lg:px-3 py-8"
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7 }}
-        >
-          <div className="w-full overflow-hidden rounded-lg bg-black">
-            <div className="relative w-full" style={{ paddingBottom: "42%" }}>
-              {videoUrl.startsWith("http") ? (
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full"
-                  src={videoUrl}
-                  title="Ramani Fashion Collection"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                  data-testid="video-banner"
-                ></iframe>
-              ) : (
+        {videoUrl && (
+          <motion.section
+            className="max-w-7xl mx-auto px-4 lg:px-3 py-8"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7 }}
+          >
+            <div className="w-full overflow-hidden rounded-lg bg-black">
+              <div className="relative w-full" style={{ paddingBottom: "42%" }}>
                 <video
                   className="absolute top-0 left-0 w-full h-full"
                   autoPlay
@@ -556,10 +538,10 @@ export default function Home() {
                   <source src={videoUrl} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
-              )}
+              </div>
             </div>
-          </div>
-        </motion.section>
+          </motion.section>
+        )}
 
         <section className="max-w-7xl mx-auto px-4 lg:px-3 py-8 md:py-12">
           <motion.div
