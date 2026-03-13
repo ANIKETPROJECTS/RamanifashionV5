@@ -15,9 +15,9 @@ module.exports = {
       PHONEPE_SALT_KEY: '1',
       SHIPROCKET_API_EMAIL: 'raneaniket23@gmail.com',
       SHIPROCKET_API_PASSWORD: '!ExeJ2E&MyR4sUbK',
-      CLOUDINARY_CLOUD_NAME: 'dfkm00gal',
-      CLOUDINARY_API_KEY: '222783755998643',
-      CLOUDINARY_API_SECRET: '5hD1xHyXcJmWmvinbRPFACkS0w8'
+      CLOUDINARY_CLOUD_NAME: 'dttagqkxr',
+      CLOUDINARY_API_KEY: '999667918396535',
+      CLOUDINARY_API_SECRET: 'nYRix_SAntFAS_LImwSxdc-O7Lk'
     },
     instances: 1,
     autorestart: true,
