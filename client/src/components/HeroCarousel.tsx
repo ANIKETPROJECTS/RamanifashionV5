@@ -1,25 +1,19 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import bannerImage from "@assets/BANNER (1).png";
 
 export default function HeroCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [heroImage, setHeroImage] = useState(bannerImage);
+  const [heroImage, setHeroImage] = useState<string>(bannerImage);
 
   useEffect(() => {
-    // Try to load the uploaded hero banner, fallback to static import
+    const cacheBust = Date.now();
     const img = new Image();
-    img.onload = () => setHeroImage("/media/hero-banner.png");
+    img.onload = () => setHeroImage(`/media/hero-banner.png?t=${cacheBust}`);
     img.onerror = () => setHeroImage(bannerImage);
-    img.src = "/media/hero-banner.png";
+    img.src = `/media/hero-banner.png?t=${cacheBust}`;
   }, []);
 
-  const slides = [
-    {
-      image: heroImage,
-    },
-  ];
+  const slides = [{ image: heroImage }];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -27,18 +21,6 @@ export default function HeroCarousel() {
     }, 5000);
     return () => clearInterval(timer);
   }, []);
-
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
 
   return (
     <div
@@ -59,6 +41,11 @@ export default function HeroCarousel() {
               className="w-full h-full object-cover object-center"
               data-testid={`img-hero-banner-${index}`}
               style={{ display: "block" }}
+              onError={(e) => {
+                if (e.currentTarget.src !== bannerImage) {
+                  e.currentTarget.src = bannerImage;
+                }
+              }}
             />
           </div>
         </div>

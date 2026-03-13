@@ -82,7 +82,7 @@ app.use("/media", express.static(primaryPath, {
       res.setHeader("Content-Type", mimeType);
     }
     res.setHeader("Accept-Ranges", "bytes");
-    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.setHeader("Cache-Control", "no-cache, must-revalidate");
   },
 }));
 

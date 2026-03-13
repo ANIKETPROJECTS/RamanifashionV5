@@ -71,43 +71,28 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [ramaniBanner, setRamaniBanner] = useState<string>(ramaniBannerStatic);
   const [videoUrl, setVideoUrl] = useState<string>(
-    "https://www.youtube.com/embed/dlCJY6x-xtI?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=dlCJY6x-xtI",
+    "https://www.youtube.com/embed/dlCJY6x-xtI?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=dlCJY6x-xtI"
   );
   const { toast } = useToast();
 
-  // Load uploaded ramani banner with fallback
   useEffect(() => {
+    const cacheBust = Date.now();
     const img = new Image();
-    img.onload = () => setRamaniBanner("/media/ramani-banner.png");
+    img.onload = () => setRamaniBanner(`/media/ramani-banner.png?t=${cacheBust}`);
     img.onerror = () => setRamaniBanner(ramaniBannerStatic);
-    img.src = "/media/ramani-banner.png";
+    img.src = `/media/ramani-banner.png?t=${cacheBust}`;
   }, []);
 
-  // Load uploaded promotional video with fallback to YouTube
   useEffect(() => {
-    console.log("[Video Debug] Checking for promotional video at /media/promotional-video.mp4");
-    fetch("/media/promotional-video.mp4", { method: "HEAD" })
+    const cacheBust = Date.now();
+    fetch(`/media/promotional-video.mp4?t=${cacheBust}`, { method: "HEAD" })
       .then((res) => {
         const contentType = res.headers.get("content-type");
-        console.log("[Video Debug] HEAD request response:", {
-          ok: res.ok,
-          status: res.status,
-          statusText: res.statusText,
-          contentType: contentType,
-          url: res.url
-        });
-        // Check if response is actually a video file (not HTML from SPA catch-all)
         if (res.ok && contentType && contentType.includes("video/mp4")) {
-          console.log("[Video Debug] Video found, using local video URL");
-          setVideoUrl("/media/promotional-video.mp4");
-        } else {
-          console.log("[Video Debug] Video not found or wrong content-type (" + contentType + "), using YouTube fallback");
+          setVideoUrl(`/media/promotional-video.mp4?t=${cacheBust}`);
         }
       })
-      .catch((err) => {
-        console.error("[Video Debug] Error fetching video:", err);
-        console.log("[Video Debug] Keeping YouTube fallback URL");
-      });
+      .catch(() => {});
   }, []);
 
   const { data: newArrivalsData } = useQuery({
@@ -442,6 +427,11 @@ export default function Home() {
               src={ramaniBanner}
               alt="Ramani Fashion - Shop the authentic Silk Sarees, crafted with perfection by local artisans"
               className="w-full h-auto object-cover"
+              onError={(e) => {
+                if (e.currentTarget.src !== ramaniBannerStatic) {
+                  e.currentTarget.src = ramaniBannerStatic;
+                }
+              }}
             />
           </div>
         </motion.section>
@@ -562,18 +552,8 @@ export default function Home() {
                   loop
                   playsInline
                   data-testid="video-banner"
-                  onError={(e) => {
-                    console.error("[Video Debug] Video element error:", e);
-                    console.error("[Video Debug] Video src:", videoUrl);
-                    console.error("[Video Debug] Video networkState:", (e.target as HTMLVideoElement).networkState);
-                    console.error("[Video Debug] Video error code:", (e.target as HTMLVideoElement).error?.code);
-                    console.error("[Video Debug] Video error message:", (e.target as HTMLVideoElement).error?.message);
-                  }}
-                  onLoadStart={() => console.log("[Video Debug] Video load started for:", videoUrl)}
-                  onLoadedData={() => console.log("[Video Debug] Video data loaded successfully")}
-                  onCanPlay={() => console.log("[Video Debug] Video can play")}
                 >
-                  <source src={videoUrl} type="video/mp4" onError={(e) => console.error("[Video Debug] Source error:", e)} />
+                  <source src={videoUrl} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
               )}
